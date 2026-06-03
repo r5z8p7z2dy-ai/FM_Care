@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#111827">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tristar Care">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="./icon-192.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Tristar Care</title>
+    <style>
+        /* iOS 2024-2025 Design System Variables */
+        :root {
+            --system-bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --primary: #007AFF; 
+            --text-main: #000000;
+            --text-sec: rgba(60, 60, 67, 0.6);
+            --separator: rgba(60, 60, 67, 0.15);
+            
+            --ios-red: #FF3B30;
+            --ios-orange: #FF9500;
+            --ios-green: #34C759;
+            --ios-indigo: #5856D6;
+            --ios-teal: #5AC8FA;
+            --ios-purple: #AF52DE;
+            --ios-gray: #8E8E93;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--system-bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            line-height: 1.4;
+            overscroll-behavior-x: none; /* Verhindert Browser-Swipe falls als Website geöffnet */
+        }
+
+        /* App Container */
+        #app-container {
+            width: 100%;
+            max-width: 430px; 
+            background-color: var(--system-bg);
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.05);
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(242, 242, 247, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid var(--separator);
+            padding: 16px 8px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+        }
+
+        .header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0;
+            opacity: 0; 
+            transition: opacity 0.3s ease;
+        }
+
+        #back-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 17px;
+            font-weight: 400;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+        }
+
+        #back-btn svg {
+            width: 14px;
+            height: 20px;
+            fill: var(--primary);
+        }
+
+        /* Typography */
+        .large-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 20px 20px 8px 20px;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-sec);
+            margin: 0 20px 24px 20px;
+            line-height: 1.3;
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            animation: pushIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes pushIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Home Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            padding: 0 20px;
+        }
+
+        .tile {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 120px;
+        }
+
+        .tile:active {
+            transform: scale(0.95);
+            background-color: #E5E5EA;
+        }
+
+        .icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .tile-title {
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: -0.01em;
+            margin-bottom: 2px;
+        }
+
+        .tile-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        /* iOS Grouped Lists */
+        .list-group {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            margin: 0 20px 24px 20px;
+            overflow: hidden;
+        }
+
+        .list-header {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--text-sec);
+            margin: 0 20px 8px 36px;
+            letter-spacing: 0.02em;
+        }
+
+        .list-item {
+            padding: 12px 16px;
+            border-bottom: 0.5px solid var(--separator);
+            font-size: 15px;
+            position: relative;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-main {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .item-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            line-height: 1;
+            padding-top: 2px;
+        }
+
+        .item-content {
+            flex-grow: 1;
+        }
+
+        .item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .item-title.blue-link {
+            color: var(--primary);
+        }
+
+        .item-desc {
+            font-size: 14px;
+            color: var(--text-sec);
+            line-height: 1.3;
+        }
+
+        /* Accordion Details */
+        .chevron {
+            color: #C7C7CC;
+            margin-left: 12px;
+            font-size: 20px;
+            font-weight: 400;
+            transition: transform 0.2s ease;
+        }
+
+        .item-details {
+            display: none;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 0.5px solid var(--separator);
+            font-size: 14px;
+            color: var(--text-sec);
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .code-box {
+            background-color: #F2F2F7;
+            padding: 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 8px 0;
+            color: var(--text-main);
+            word-break: break-all;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Badges */
+        .ios-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 6px;
+        }
+
+        /* Bottom Back Button */
+        .bottom-back-btn {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 32px 20px 20px 20px;
+            padding: 14px;
+            background-color: var(--card-bg);
+            color: var(--primary);
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s;
+        }
+
+        .bottom-back-btn:active {
+            transform: scale(0.96);
+            background-color: #E5E5EA;
+        }
+
+        /* Colors */
+        .bg-blue { background-color: var(--primary); color: white;}
+        .bg-green { background-color: var(--ios-green); color: white;}
+        .bg-orange { background-color: var(--ios-orange); color: white;}
+        .bg-red { background-color: var(--ios-red); color: white;}
+        .bg-indigo { background-color: var(--ios-indigo); color: white;}
+        .bg-teal { background-color: var(--ios-teal); color: white;}
+        .bg-purple { background-color: var(--ios-purple); color: white;}
+        .bg-gray { background-color: var(--ios-gray); color: white;}
+
+
+        /* Added: modern FM dashboard elements */
+        .hero-card {
+            margin: 16px 20px 22px;
+            padding: 20px;
+            border-radius: 28px;
+            background: linear-gradient(135deg, #101827, #1f3b57);
+            color: white;
+            box-shadow: 0 18px 40px rgba(16,24,39,.22);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-card:after {
+            content: "";
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            right: -70px;
+            top: -70px;
+            background: rgba(90,200,250,.18);
+        }
+
+        .hero-card h2 {
+            margin: 4px 0;
+            font-size: 24px;
+            letter-spacing: -0.03em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-card p {
+            margin: 0;
+            max-width: 270px;
+            font-size: 14px;
+            color: rgba(255,255,255,.72);
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.65);
+            letter-spacing: .08em;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-icon {
+            font-size: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search {
+            width: calc(100% - 40px);
+            margin: 0 20px 18px;
+            padding: 14px 16px;
+            border: 0;
+            border-radius: 16px;
+            background: white;
+            font-size: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,.04);
+            outline: none;
+        }
+
+        .search-results {
+            display: none;
+            margin: 0 20px 22px;
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+
+        .search-result {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--separator);
+            cursor: pointer;
+        }
+
+        .search-result:last-child { border-bottom: 0; }
+        .search-result b { display: block; font-size: 15px; }
+        .search-result span { color: var(--text-sec); font-size: 13px; }
+
+        .priority-stack {
+            display: grid;
+            gap: 10px;
+            margin: 0 20px 24px;
+        }
+
+        .priority {
+            padding: 14px 16px;
+            border-radius: 18px;
+            background: white;
+            display: grid;
+            grid-template-columns: 76px 1fr auto;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+
+        .priority b { font-size: 14px; }
+        .priority span { color: var(--text-sec); font-size: 13px; }
+        .priority em { font-style: normal; font-weight: 700; font-size: 13px; white-space: nowrap; }
+        .priority.red { border-left: 6px solid var(--ios-red); }
+        .priority.orange { border-left: 6px solid var(--ios-orange); }
+        .priority.yellow { border-left: 6px solid #FFD60A; }
+        .priority.gray { border-left: 6px solid var(--ios-gray); }
+
+        .timeline {
+            margin: 0 20px 24px;
+            background: white;
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+
+        .step {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--separator);
+            font-size: 15px;
+        }
+
+        .step:last-child { border-bottom: 0; }
+        .step b {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #111827;
+            color: white;
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .quick-actions {
+            display: grid;
+            gap: 10px;
+            margin: 0 20px 24px;
+        }
+
+        .action-btn {
+            display: block;
+            text-decoration: none;
+            background: #111827;
+            color: white;
+            padding: 13px 14px;
+            border-radius: 14px;
+            font-weight: 650;
+            font-size: 15px;
+            box-shadow: 0 8px 22px rgba(17,24,39,.18);
+        }
+
+        .note-card {
+            margin: 0 20px 24px;
+            background: rgba(0,122,255,.10);
+            border: 1px solid rgba(0,122,255,.18);
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #0b315f;
+        }
+
+        .item-title { font-size: 16px; font-weight: 650; }
+        .item-desc { font-size: 15px; line-height: 1.45; }
+        .item-details { font-size: 15px; line-height: 1.55; }
+        .tile-title { font-size: 16px; }
+        .tile-desc { font-size: 14px; }
+
+        @media (max-width: 380px) {
+            .priority { grid-template-columns: 1fr; gap: 4px; }
+        }
+
+
+
+        /* Added: Today cockpit, hotel setup and room maintenance documentation */
+        .hero-card { cursor: pointer; }
+        .hero-card:active { transform: scale(.985); }
+        .hero-card .hero-hint { margin-top: 8px; font-size: 12px; color: rgba(255,255,255,.62); font-weight: 650; }
+
+        .top-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 0 20px 22px;
+        }
+
+        .soft-btn, .danger-btn, .primary-btn {
+            border: 0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .primary-btn { background: #111827; color: white; box-shadow: 0 8px 22px rgba(17,24,39,.18); }
+        .soft-btn { background: white; color: var(--primary); box-shadow: 0 4px 18px rgba(0,0,0,.04); }
+        .danger-btn { background: rgba(255,59,48,.10); color: var(--ios-red); }
+
+        .today-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 0 20px 24px;
+        }
+
+        .today-card {
+            background: white;
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+            border-left: 6px solid var(--primary);
+        }
+
+        .today-card.orange { border-left-color: var(--ios-orange); }
+        .today-card.green { border-left-color: var(--ios-green); }
+        .today-card.red { border-left-color: var(--ios-red); }
+        .today-card h3 { margin: 0 0 6px; font-size: 17px; letter-spacing: -.01em; }
+        .today-card p { margin: 0; font-size: 14px; color: var(--text-sec); line-height: 1.45; }
+
+        .form-card {
+            margin: 0 20px 24px;
+            background: white;
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+
+        .form-row { margin-bottom: 12px; }
+        .form-row label { display: block; font-size: 13px; color: var(--text-sec); font-weight: 700; margin-bottom: 6px; }
+        .form-row input, .form-row select, .form-row textarea {
+            width: 100%; border: 1px solid var(--separator); background: #F9F9FB; border-radius: 12px;
+            padding: 12px; font-size: 16px; outline: none; font-family: inherit;
+        }
+        .form-row textarea { min-height: 88px; resize: vertical; }
+
+        .floor-row, .checklist-edit-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .checklist-edit-row { grid-template-columns: 1fr auto; }
+        .floor-row input, .checklist-edit-row input { margin: 0; }
+        .round-icon-btn {
+            width: 42px; height: 42px; border-radius: 13px; border: 0; background: #F2F2F7;
+            color: var(--ios-red); font-size: 18px; font-weight: 800; cursor: pointer;
+        }
+
+        .setup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            z-index: 999;
+            padding: 22px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .setup-modal {
+            width: min(430px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--system-bg);
+            border-radius: 28px;
+            padding: 20px 0 8px;
+            box-shadow: 0 28px 80px rgba(0,0,0,.30);
+        }
+
+        .room-pill-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .room-pill {
+            border: 0;
+            background: white;
+            border-radius: 14px;
+            padding: 12px 4px;
+            font-weight: 750;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,.04);
+        }
+        .room-pill.done { background: rgba(52,199,89,.15); color: #187335; }
+        .room-pill.active { background: #111827; color: white; }
+
+        .check-item {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--separator);
+            font-size: 15px;
+        }
+        .check-item:last-child { border-bottom: 0; }
+        .check-item input { width: 22px; height: 22px; margin-top: 1px; accent-color: var(--ios-green); }
+
+        .progress-wrap {
+            margin: 0 20px 20px;
+            background: white;
+            padding: 14px 16px;
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.05);
+        }
+        .progress-bar {
+            height: 10px;
+            background: #E5E5EA;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar span { display: block; height: 100%; background: var(--ios-green); width: 0%; transition: width .25s ease; }
+        .progress-text { font-size: 14px; color: var(--text-sec); }
+
+
+
+        /* Added v2: collapsible floors, per-item issue notes, settings and report */
+        .floor-accordion { margin: 0 20px 14px; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,.05); }
+        .floor-head { width:100%; border:0; background:white; padding: 15px 16px; display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:16px; cursor:pointer; }
+        .floor-head span { color: var(--text-sec); font-weight:650; font-size:13px; }
+        .floor-body { display:none; padding: 0 12px 14px; }
+        .floor-accordion.open .floor-body { display:block; }
+        .floor-accordion.open .floor-head .chev { transform: rotate(90deg); }
+        .room-pill.expired { background: rgba(255,149,0,.16); color:#915600; }
+        .room-pill.open { background: white; color: var(--text-main); }
+        .room-selected-banner { margin: 0 20px 14px; padding: 14px 16px; border-radius: 18px; background: #111827; color:white; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 10px 30px rgba(17,24,39,.20); }
+        .room-selected-banner b { font-size:18px; }
+        .check-card { padding: 13px 0; border-bottom: 1px solid var(--separator); }
+        .check-card:last-child { border-bottom:0; }
+        .check-title { font-weight:750; font-size:15px; margin-bottom:10px; }
+        .check-options { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:10px; }
+        .check-options label { background:#F2F2F7; border-radius:12px; padding:9px 8px; font-size:13px; font-weight:700; text-align:center; }
+        .check-options input { margin-right:4px; accent-color: var(--ios-green); }
+        .issue-note { min-height:56px !important; font-size:14px !important; display:none; }
+        .check-card.problem .issue-note, .check-card.note-open .issue-note { display:block; }
+        .settings-section-title { margin: 26px 20px 8px; font-size:13px; text-transform:uppercase; color:var(--text-sec); font-weight:800; letter-spacing:.04em; }
+        .backup-box { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; min-height:110px !important; font-size:12px !important; }
+        .overview-legend { display:flex; gap:8px; flex-wrap:wrap; margin: 0 20px 14px; }
+        .legend-chip { padding:7px 10px; border-radius:99px; font-size:12px; font-weight:800; background:white; }
+        .legend-chip.done { color:#187335; }
+        .legend-chip.expired { color:#915600; }
+        .legend-chip.open { color:#555; }
+
+
+
+        /* Added v3: clearer maintenance actions, playful rounds and print report */
+        .quick-ok-btn { background: rgba(52,199,89,.14); color:#187335; border:0; border-radius:14px; padding:12px 14px; font-weight:850; font-size:15px; cursor:pointer; }
+        .quick-ok-btn:active { transform: scale(.98); }
+        .round-dashboard { margin: 0 20px 18px; display:grid; gap:12px; }
+        .round-card { background:white; border-radius:22px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,.05); border-left:7px solid var(--primary); }
+        .round-card.week { border-left-color: var(--ios-orange); }
+        .round-card.month { border-left-color: var(--ios-indigo); }
+        .round-card.quarter { border-left-color: var(--ios-gray); }
+        .round-card.half { border-left-color: var(--ios-green); }
+        .round-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; }
+        .round-head h2 { margin:0; font-size:18px; letter-spacing:-.02em; }
+        .round-chip { padding:6px 10px; border-radius:999px; font-size:12px; font-weight:850; background:#F2F2F7; color:#111827; white-space:nowrap; }
+        .round-tasks { display:grid; gap:8px; }
+        .round-task { display:grid; grid-template-columns:28px 1fr; gap:10px; align-items:start; padding:9px 10px; border-radius:14px; background:#F7F7FA; font-size:15px; }
+        .round-task b { width:24px; height:24px; border-radius:50%; background:#111827; color:white; display:grid; place-items:center; font-size:12px; }
+        .round-action { margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
+        .round-action button { border:0; border-radius:12px; padding:10px 12px; font-weight:800; cursor:pointer; }
+        .round-action .start { background:#111827; color:white; }
+        .round-action .ghost { background:#F2F2F7; color:#111827; }
+        .file-input-hidden { display:none; }
+
+        #print-report { display:none; }
+
+        @media print {
+            @page { size: A4 landscape; margin: 10mm; }
+            body { background: white; display:block; }
+            #app-container, .setup-overlay { display: none !important; }
+            #print-report { display: block !important; font-family: Arial, sans-serif; color:#111; padding: 0; }
+            #print-report h1 { font-size: 18pt; margin: 0 0 3mm; }
+            #print-report h2 { font-size: 12pt; margin: 4mm 0 2mm; }
+            #print-report h3 { font-size: 11pt; margin: 0 0 2mm; }
+            #print-report table { width: 100%; border-collapse: collapse; margin-top: 3mm; }
+            #print-report th, #print-report td { border: 1px solid #999; padding: 4px 5px; font-size: 8.3pt; vertical-align: top; }
+            #print-report .meta { font-size: 10pt; line-height: 1.45; margin-bottom: 4mm; }
+            #print-report .overview-page { page-break-after: always; }
+            #print-report .room-page { page-break-after: always; min-height: 180mm; position: relative; }
+            #print-report .room-page:last-child { page-break-after: auto; }
+            #print-report .status-done { background:#dff3e5 !important; }
+            #print-report .status-expired { background:#fff1d6 !important; }
+            #print-report .status-open { background:#eeeeee !important; }
+            #print-report .status-problem { background:#ffd9d6 !important; }
+            #print-report .status-warning { background:#ffe8b3 !important; }
+            #print-report .status-critical { background:#ffd1cc !important; }
+            #print-report .report-kpi { display:grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; margin: 4mm 0 5mm; }
+            #print-report .kpi-box { border-radius: 4mm; padding: 4mm; border:1px solid #aaa; }
+            #print-report .kpi-box b { font-size: 18pt; display:block; }
+            #print-report .manager-sign { margin-top: 8mm; border: 1px solid #999; min-height: 18mm; padding: 3mm; width: 95mm; }
+            #print-report .small { font-size: 8pt; color:#444; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <header id="main-header">
+        <button id="back-btn" onclick="goHome()">
+            <svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+            Übersicht
+        </button>
+        <h1 class="header-title" id="header-title">Tristar Care</h1>
+    </header>
+
+    <!-- 1. HOME VIEW -->
+    <div id="view-home" class="view active">
+        <h1 class="large-title">Tristar Care</h1>
+        <div class="hero-card" onclick="openView('view-heute', 'Heute')">
+            <div>
+                <div class="eyebrow">FM-Kompass</div>
+                <h2>Was ist heute zu tun?</h2>
+                <p>Rundgänge, Mängel, Wartung und Prüfungen auf einen Blick.</p><div class="hero-hint">Antippen für Tagesvorschläge</div>
+            </div>
+            <div class="hero-icon">🛠️</div>
+        </div>
+        <input id="search" class="search" placeholder="Suchen: FSA, BMA, Legionellen, Mangel…" oninput="filterContent(this.value)">
+        <div id="search-results" class="search-results"></div>
+        
+        <div class="grid" id="home-grid">
+            <div class="tile" onclick="openView('view-zimmerwartung', 'Zimmerwartung')">
+                <div class="icon-wrapper bg-green">🛏️</div>
+                <div>
+                    <div class="tile-title">Zimmerwartung</div>
+                    <div class="tile-desc">Checkliste & PDF-Doku</div>
+                </div>
+            </div>
+            <div class="tile" onclick="openView('view-rundgaenge', 'Rundgänge')">
+                <div class="icon-wrapper bg-blue">🔄</div>
+                <div>
+                    <div class="tile-title">Rundgänge</div>
+                    <div class="tile-desc">Checks & Zähler</div>
+                </div>
+            </div>
+            
+            <div class="tile" onclick="openView('view-reparaturen', 'Reparaturen')">
+                <div class="icon-wrapper bg-orange">🛠️</div>
+                <div>
+                    <div class="tile-title">Reparaturen</div>
+                    <div class="tile-desc">Aufträge & Firmen</div>
+                </div>
+            </div>
+            
+            <div class="tile" onclick="openView('view-wartung', 'Wartung')">
+                <div class="icon-wrapper bg-indigo">💨</div>
+                <div>
+                    <div class="tile-title">Wartung</div>
+                    <div class="tile-desc">Fancoils & Anlagen</div>
+                </div>
+            </div>
+            
+            <div class="tile" onclick="openView('view-legionellen', 'Trinkwasser')">
+                <div class="icon-wrapper bg-teal">💧</div>
+                <div>
+                    <div class="tile-title">Trinkwasser</div>
+                    <div class="tile-desc">Legionellenschutz</div>
+                </div>
+            </div>
+
+            <div class="tile" onclick="openView('view-maengel', 'Mängel-Guide')">
+                <div class="icon-wrapper bg-red">⚠️</div>
+                <div>
+                    <div class="tile-title">Mängel-Guide</div>
+                    <div class="tile-desc">Fristen & Eskalation</div>
+                </div>
+            </div>
+            
+            <div class="tile" onclick="openView('view-mail', 'Mailvorlagen')">
+                <div class="icon-wrapper bg-indigo">✉️</div>
+                <div>
+                    <div class="tile-title">Mailvorlagen</div>
+                    <div class="tile-desc">MMF & Nachfristen</div>
+                </div>
+            </div>
+
+            <div class="tile" onclick="openView('view-tuev', 'Brandschutz & SV')">
+                <div class="icon-wrapper bg-green">🛡️</div>
+                <div>
+                    <div class="tile-title">Brandschutz & SV</div>
+                    <div class="tile-desc">TÜV, BMA & Übungen</div>
+                </div>
+            </div>
+
+            <div class="tile" onclick="openView('view-admin', 'Admin & Orga')">
+                <div class="icon-wrapper bg-gray">⚙️</div>
+                <div>
+                    <div class="tile-title">Admin & Orga</div>
+                    <div class="tile-desc">Verträge & Inventur</div>
+                </div>
+            </div>
+
+
+            <div class="tile" onclick="openView('view-einstellungen', 'Einstellungen')">
+                <div class="icon-wrapper bg-gray">⚙️</div>
+                <div>
+                    <div class="tile-title">Einstellungen</div>
+                    <div class="tile-desc">Profil, Backup & Checkliste</div>
+                </div>
+            </div>
+
+            <div class="tile" onclick="openView('view-einkauf', 'Einkauf')">
+                <div class="icon-wrapper bg-purple">🛒</div>
+                <div>
+                    <div class="tile-title">Einkauf</div>
+                    <div class="tile-desc">Partner & Shops</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. RUNDGÄNGE -->
+    <div id="view-rundgaenge" class="view">
+        <h1 class="large-title">Rundgänge</h1>
+        <p class="subtitle">Als Arbeitskarten aufgebaut: erst die Pflicht, dann Auffälligkeiten dokumentieren.</p>
+
+        <div class="round-dashboard">
+            <div class="round-card">
+                <div class="round-head"><div><h2>Täglicher Sicherheitsblick</h2><p class="item-desc">Kurzer Rundgang, keine Textarbeit.</p></div><span class="round-chip">jeden Tag</span></div>
+                <div class="round-tasks">
+                    <div class="round-task"><b>1</b><span>Sicherheitsrelevante Anlagen sichtbar prüfen.</span></div>
+                    <div class="round-task"><b>2</b><span>Öffentliche Gast- und Etagenflure prüfen.</span></div>
+                    <div class="round-task"><b>3</b><span>Technikräume: Zugang, Ordnung, Leckage, ungewöhnliche Geräusche.</span></div>
+                    <div class="round-task"><b>!</b><span>Bei Gefahr: erst sichern, dann GM/FM/Operations informieren.</span></div>
+                </div>
+                <div class="round-action"><button class="start" onclick="openView('view-maengel','Mängel-Guide')">Mangel melden</button><button class="ghost" onclick="openView('view-zimmerwartung','Zimmerwartung')">Zimmerwartung</button></div>
+            </div>
+
+            <div class="round-card week">
+                <div class="round-head"><div><h2>Wöchentlicher Technik-Check</h2><p class="item-desc">Alles, was erfahrungsgemäß liegen bleibt.</p></div><span class="round-chip">1× pro Woche</span></div>
+                <div class="round-tasks">
+                    <div class="round-task"><b>1</b><span>Notausgänge und Treppenhäuser frei von Brandlasten halten.</span></div>
+                    <div class="round-task"><b>2</b><span>Gas, Wasser, Strom und weitere Zähler nach Vorgabe ablesen.</span></div>
+                    <div class="round-task"><b>3</b><span>Außenbereiche, Dachtechnik und Außenbeleuchtung nach Bedarf prüfen.</span></div>
+                    <div class="round-task"><b>4</b><span>RLT-Filterverlust beachten; bei zu hohem Druckverlust Filterwechsel anstoßen.</span></div>
+                </div>
+            </div>
+
+            <div class="round-card month">
+                <div class="round-head"><div><h2>Monatsrunde</h2><p class="item-desc">Dokumentationspflicht sauber abhaken.</p></div><span class="round-chip">monatlich</span></div>
+                <div class="round-tasks">
+                    <div class="round-task"><b>1</b><span>Feststellanlagen prüfen und dokumentieren.</span></div>
+                    <div class="round-task"><b>2</b><span>Behindertennotrufe an jeder Bedienstelle testen.</span></div>
+                    <div class="round-task"><b>3</b><span>Wasserhärte bei Enthärtungsanlagen messen und dokumentieren.</span></div>
+                </div>
+            </div>
+
+            <div class="round-card quarter">
+                <div class="round-head"><div><h2>Quartalsrunde</h2><p class="item-desc">Tiefe Sichtprüfung und Reinigung.</p></div><span class="round-chip">quartalsweise</span></div>
+                <div class="round-tasks">
+                    <div class="round-task"><b>1</b><span>Fassade und Dachflächen auf Auffälligkeiten prüfen.</span></div>
+                    <div class="round-task"><b>2</b><span>Kühlhäuser: Gitter und Verdampferlamellen reinigen.</span></div>
+                    <div class="round-task"><b>3</b><span>Allgemeine technische Zimmerprüfung über Zimmerwartung dokumentieren.</span></div>
+                    <div class="round-task"><b>4</b><span>Werkzeuginventur bei Bedarf / gemäß Vorgabe aktualisieren.</span></div>
+                </div>
+            </div>
+
+            <div class="round-card half">
+                <div class="round-head"><div><h2>Halbjahresrunde</h2><p class="item-desc">Nicht aufschieben.</p></div><span class="round-chip">halbjährlich</span></div>
+                <div class="round-tasks">
+                    <div class="round-task"><b>FI</b><span>Alle FI-Schutzschalter/RCDs im Haus über Prüftaste auslösen und protokollieren.</span></div>
+                    <div class="round-task"><b>HT</b><span>Bei Auffälligkeiten nicht nur abhaken: Foto, Notiz, Hotelkit-Auftrag.</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Zusätzliche Prüfungen</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Enthärtungsanlagen</div>
+                        <div class="item-desc">Salz, Wasserhärte und Material</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • <b>Salzbehälter:</b> spätestens alle 2 Tage prüfen und ggf. nachfüllen.<br>
+                    • <b>Wasserhärte:</b> einmal monatlich messen und dokumentieren.<br>
+                    • <b>Einkauf:</b> Messkits und Salztabletten über <i>derExpress</i> bestellen.
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 3. REPARATUREN -->
+    <div id="view-reparaturen" class="view">
+        <h1 class="large-title">Reparaturen</h1>
+        
+        <div class="list-header">Hotelkit & Eigenleistung</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">TV-Geräte</div>
+                        <div class="item-desc">1. Software via USB neu einspielen.<br>2. Netzwerkports am Switch prüfen.<br>3. Erst dann TV-Support kontaktieren.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Wände, Tapeten & Regionalmaler</div>
+                        <div class="item-desc">Umgang mit Malerarbeiten</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • <b>Eigenleistung:</b> Kleine Wandschäden zwingend selbst von "Ecke zu Ecke" überstreichen.<br>
+                    • <b>Regionalmaler (München/NRW):</b> Für große Arbeiten via Hotelkit anfordern (Vorlage "Malerauftrag MUC/NRW").<br>
+                    • <b>Supportpflicht:</b> Der Haustechniker muss den Maler vor Ort bei Abklebe-, Abdeck- und Demontagearbeiten zwingend unterstützen!
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Fremdfirmen & Sicherheit</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Umgang mit Fremdfirmen</div>
+                        <div class="item-desc">Anmeldung & Unterweisungsformular</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • Externe Mitarbeiter müssen sich <b>immer</b> an der Rezeption an- und abmelden.<br>
+                    • <b>Zwingend:</b> Externe dürfen nur arbeiten, wenn sie das <i>Unterweisungsformular Fremdfirmen</i> unterschrieben haben!
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Vier-Augen-Prinzip</div>
+                        <div class="item-desc">Arbeiten, die aus Sicherheitsgründen eine zweite Person erfordern, über das FM-Team organisieren.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Fehlersuche vor Beauftragung</div>
+                        <div class="item-desc">Auch außerhalb der Garantie: Zuerst Gehäuse öffnen und Ursache selbst prüfen, um unnötige Anfahrtskosten zu vermeiden.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 4. WARTUNG -->
+    <div id="view-wartung" class="view">
+        <h1 class="large-title">Wartung</h1>
+        
+        <div class="list-header">Klima & Lüftung</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Fancoils (Klimageräte)</div>
+                        <div class="item-desc">Intervalle & Hotelkit-Doku</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    <b>Intervalle:</b><br>
+                    • 1/4-jährlich: Filter überprüfen/absaugen.<br>
+                    • 1/2-jährlich: Ansaug-/Ausblaskasten reinigen.<br>
+                    • Jährlich: Leitungen prüfen, entlüften, Wannen reinigen.<br><br>
+                    <b>Hotelkit Doku:</b><br>
+                    Aufgabe erstellen > tristar > Vorlage "Wartungsbericht Fancoils". Als PDF speichern unter:<br>
+                    <div class="code-box">#07Facility_Management/#09Wartungen/Wartungsberichte/2022/Fancoils</div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">RLT-Zentralgeräte</div>
+                        <div class="item-desc">Filterwechsel bei Differenzdruck 200–250 Pa (GLT/Manometer). Bei Ernte/Baustellen in der Umgebung häufiger prüfen!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Spezial-Geräte & Fenster</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Kaffeevollautomaten</div>
+                        <div class="item-desc">Service-Anzeigen & Verträge</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • Alle angezeigten Wartungen <b>müssen</b> beauftragt werden (Sicherheitsventile!).<br>
+                    • <b>Kosten-Faktor:</b> Niemals manuell zurücksetzen. Wir haben keinen Vollwartungsvertrag, da Einzelbeauftragungen ca. 30% günstiger sind.<br>
+                    • Preisvereinbarungen liegen in Hotelkit.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Eiswürfelmaschinen</div>
+                        <div class="item-desc">Reinigungsvorgaben</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • Generell streng nach Herstelleranweisungen reinigen.<br>
+                    • Fehlende Anleitungen können auf der Website des Herstellers heruntergeladen werden.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Fenster</div>
+                        <div class="item-desc">Jährliche Inspektion & Doku</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • <b>Pflege:</b> Beschläge mit harz- und säurefreiem Öl (Kein WD40) behandeln. Keine essighaltigen Reiniger!<br>
+                    • <b>Hotelkit Doku:</b> Vorlage "Inspektion und Wartung Fenster" abarbeiten. PDF ablegen unter:<br>
+                    <div class="code-box">#07Facility_Management/#09Wartungen/Wartungsberichte/2022/Fenster</div>
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 5. LEGIONELLEN -->
+    <div id="view-legionellen" class="view">
+        <h1 class="large-title">Trinkwasser</h1>
+        
+        <div class="list-header">Grundregeln (TrinkwV)</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Temperaturen</div>
+                        <div class="item-desc">Austritt > 60°C. Zirkulation > 55°C.<br>Zirkulationspumpen niemals abschalten.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Die 72-Stunden Spül-Regel</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Gastzimmer (>72h unbelegt)</div>
+                        <div class="item-desc">Dusch/Waschtisch Spülvorgang & Doku</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • Waschtisch & Dusche voll auf Heiß stellen und 1 Minute laufen lassen (Heißwassersperre drücken!). WC spülen.<br><br>
+                    <b>Dokumentation (Opera vs. Hilton):</b><br>
+                    • <b>IHG / Opera:</b> Report "HSK - Legionellen Report (3Days)" täglich ausdrucken, spülen, abhaken und abheften.<br>
+                    • <b>Hilton / Non-Opera:</b> Klassische Zimmerlisten verwenden, spülen, unterschreiben und als Nachweis abheften.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Allgemeine Zapfstellen</div>
+                        <div class="item-desc">Etagenserviceräume, Behinderten-WCs, Außenzapfstellen und Putzmittelräume nach 3 Tagen 1 Minute spülen. Bodenabläufe mit 0,5L befüllen.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Maschinen & Geräte</div>
+                        <div class="item-desc">Waschmaschinen (Kurzprogramm), Kaffeemaschinen (10x Tee-Wasser ziehen), Eiswürfelbereiter komplett leeren.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Notfall-Protokoll</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title" style="color:var(--ios-red);">Positiver Legionellenbefund</div>
+                        <div class="item-desc">Hotelkit Sofort-Maßnahme</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Umgehend eine Schnellcheckliste in Hotelkit anlegen:<br>
+                    1. Aufgabe erstellen > tristar > Vorlagen.<br>
+                    2. Suchen: <b>Schnell-Checkliste</b><br>
+                    3. Eintrag: <i>XXXXX | Legionellenbefall nach Trinkwasserbeprobung | Schnell-Checkliste</i> erstellen.<br>
+                    4. Empfänger: GM & Haustechniker. Abonnent: RMO & FM-Gruppe.<br>
+                    5. Sofort abarbeiten!
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 6. MÄNGEL-GUIDE -->
+    <div id="view-maengel" class="view">
+        <h1 class="large-title">Mängel-Guide</h1>
+        <p class="subtitle">Erst sichern, dann sauber dokumentieren. Frist richtet sich nach Risiko.</p>
+
+        <div class="priority-stack">
+            <div class="priority red"><b>Sofort</b><span>Personengefahr</span><em>max. 1 Woche</em></div>
+            <div class="priority orange"><b>Hoch</b><span>Gäste stark betroffen</span><em>max. 2 Wochen</em></div>
+            <div class="priority yellow"><b>Mittel</b><span>wird zeitkritisch</span><em>max. 1 Monat</em></div>
+            <div class="priority gray"><b>Niedrig</b><span>nicht zeitkritisch</span><em>max. 3 Monate</em></div>
+        </div>
+
+        <div class="list-header">Rechtliche Unterscheidung</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Mangel vs. Bedenkenanmeldung</div>
+                        <div class="item-desc">
+                            • <b>Mangelmeldung (MMF):</b> Konkreter Defekt am Pachtobjekt (z.B. defektes Rohr).<br>
+                            • <b>Bedenkenanmeldung:</b> Präventiver Hinweis (z.B. Schneeeintritt in RLT-Zentrale) zur eigenen Absicherung, falls daraus später ein Defekt entsteht.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="list-header">Priorisierung & Eskalation</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <span class="ios-badge bg-red">Sofort (Personengefahr)</span>
+                        <div class="item-desc">Gefahr sofort sichern oder beheben. GM, FM und ggf. Haustechnik sofort telefonisch informieren. Zusätzlich Operations Manager/RMO und FM per Aufgabe/Übergabe in hotelkit einbinden.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <span class="ios-badge bg-orange">Hoch (Max 2 Wochen)</span>
+                        <div class="item-desc">Gäste stark betroffen. Haustechnik, GM & FM informieren. Angebot einholen.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Eskalations-Pfad (Verpächter)</div>
+                        <div class="item-desc">Erstmeldung, Nachfristen & FM-Übergabe</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    1. <b>Frist nach Priorität setzen:</b> Rot max. 1 Woche, Orange max. 2 Wochen, Gelb max. 1 Monat, Grau max. 3 Monate.<br>
+                    2. <b>Standardfall:</b> Wenn nichts Kritisches vorliegt, sind 2–3 Wochen als praktische Orientierung möglich.<br>
+                    3. <b>Nachfristen (1 & 2):</b> Kein neues Ticket! Altes MMF-Ticket aktualisieren, PDF neu drucken und erneut senden.<br>
+                    4. <b>FM-Übergabe:</b> Wenn die 2. Nachfrist abläuft, Haken bei "Rückmeldung Verpächter" auf NEIN setzen und Übergabeaufgabe an FM stellen. FM entscheidet über das weitere Vorgehen.
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Nachfrist-Ablauf</div>
+        <div class="timeline">
+            <div class="step"><b>1</b><span>Erstmeldung senden und Frist setzen</span></div>
+            <div class="step"><b>2</b><span>Fristablauf prüfen und nachhaken</span></div>
+            <div class="step"><b>3</b><span>1. Nachfrist im bestehenden MMF setzen</span></div>
+            <div class="step"><b>4</b><span>2. Nachfrist im bestehenden MMF setzen</span></div>
+            <div class="step"><b>5</b><span>Übergabe an FM, wenn keine Lösung erfolgt</span></div>
+        </div>
+
+        <div class="list-header">Mail-Schnellstart</div>
+        <div class="quick-actions">
+            <a class="action-btn" href="mailto:?subject=Mangelmeldung%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Aanbei%20%C3%BCbersenden%20wir%20Ihnen%20die%20Mangelmeldung%20zur%20weiteren%20Bearbeitung.%0D%0A%0D%0ABitte%20geben%20Sie%20uns%20bis%20zum%20TT.MM.JJJJ%20eine%20R%C3%BCckmeldung%20zum%20weiteren%20Vorgehen.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 Erstmeldung</a>
+            <a class="action-btn" href="mailto:?subject=1.%20Nachfrist%20-%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Azu%20unserer%20Mangelmeldung%20haben%20wir%20bisher%20keine%20ausreichende%20R%C3%BCckmeldung%20bzw.%20keine%20Erledigung%20erhalten.%0D%0A%0D%0AWir%20setzen%20Ihnen%20hiermit%20eine%201.%20Nachfrist%20bis%20zum%20TT.MM.JJJJ.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 1. Nachfrist</a>
+            <a class="action-btn" href="mailto:?subject=2.%20Nachfrist%20-%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Aauch%20nach%20Ablauf%20der%201.%20Nachfrist%20liegt%20uns%20keine%20abschlie%C3%9Fende%20Erledigung%20vor.%0D%0A%0D%0AWir%20setzen%20Ihnen%20hiermit%20eine%20letzte%202.%20Nachfrist%20bis%20zum%20TT.MM.JJJJ.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 2. Nachfrist</a>
+        </div>
+
+        <div class="list-header">Hotelkit & Doku-Sonderfälle</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Klickpfad: Mangelmeldung (MMF) erstellen</div>
+                        <div class="item-desc">Hotelkit & PDF Ablage</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    <b>Titel-Format:</b> MMF - HOTELKÜRZEL - Nr - Raum - Gewerk - Mangel<br><br>
+                    1. Hotelkit > Aufgabe > Vorlage: Mangelmeldeformular.<br>
+                    2. Empfänger: GM + Haustechniker.<br>
+                    3. Abonnenten: zuständige FM-Gruppe + Operations Manager/RMO.<br>
+                    4. Erledigung auf "Gemeinsam".<br>
+                    5. Fotos und Anhänge beifügen. Nichts umbenennen!<br>
+                    6. <b>PDF Export:</b> Nur "Text" und "Checkliste" anhaken.<br>
+                    7. <b>S-Laufwerk:</b> <i>#07_Facility_Management/#06_Mangelmeldungen/MMF001</i><br>
+                    8. Rückmeldungen des Verpächters immer im MMF ergänzen. Ist der Verpächter unbekannt: FM fragen.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">ASUC Begehungsberichte</div>
+                        <div class="item-desc">Umgang mit ASUC Mängeln</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Bauliche Mängel bezüglich Arbeits- und Brandschutz aus ASUC-Berichten müssen an den Verpächter gemeldet werden. <br><br>
+                    <b>WICHTIG:</b> Der Bericht darf <b>NICHT</b> mitgesendet werden. Es ist lediglich ein Screenshot des besagten Punktes an die Mangelmeldung anzufügen.
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+
+    <!-- 6b. MAILVORLAGEN -->
+    <div id="view-mail" class="view">
+        <h1 class="large-title">Mailvorlagen</h1>
+        <p class="subtitle">Kurze Vorlagen für den Versand von Mangelmeldungen. Platzhalter vor dem Senden ersetzen.</p>
+
+        <div class="list-header">Verpächter / externe Firma</div>
+        <div class="quick-actions">
+            <a class="action-btn" href="mailto:?subject=Mangelmeldung%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Aanbei%20%C3%BCbersenden%20wir%20Ihnen%20die%20Mangelmeldung%20zur%20weiteren%20Bearbeitung.%0D%0A%0D%0ABitte%20geben%20Sie%20uns%20bis%20zum%20TT.MM.JJJJ%20eine%20R%C3%BCckmeldung%20zum%20weiteren%20Vorgehen.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 Erstmeldung öffnen</a>
+            <a class="action-btn" href="mailto:?subject=1.%20Nachfrist%20-%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Azu%20unserer%20Mangelmeldung%20haben%20wir%20bisher%20keine%20ausreichende%20R%C3%BCckmeldung%20bzw.%20keine%20Erledigung%20erhalten.%0D%0A%0D%0AWir%20setzen%20Ihnen%20hiermit%20eine%201.%20Nachfrist%20bis%20zum%20TT.MM.JJJJ.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 1. Nachfrist öffnen</a>
+            <a class="action-btn" href="mailto:?subject=2.%20Nachfrist%20-%20MMF-%20HOTELCODE-%20Nr-%20Raum-%20Gewerk-%20Mangel&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Aauch%20nach%20Ablauf%20der%201.%20Nachfrist%20liegt%20uns%20keine%20abschlie%C3%9Fende%20Erledigung%20vor.%0D%0A%0D%0AWir%20setzen%20Ihnen%20hiermit%20eine%20letzte%202.%20Nachfrist%20bis%20zum%20TT.MM.JJJJ.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 2. Nachfrist öffnen</a>
+            <a class="action-btn" href="mailto:?subject=Bedenkenanmeldung%20-%20HOTELCODE-%20Bereich-%20Thema&body=Sehr%20geehrte%20Damen%20und%20Herren,%0D%0A%0D%0Awir%20melden%20vorsorglich%20Bedenken%20zu%20folgendem%20Sachverhalt%20an:%0D%0A%0D%0A%5BBeschreibung%20einf%C3%BCgen%5D%0D%0A%0D%0ABitte%20pr%C3%BCfen%20Sie%20die%20Situation%20und%20geben%20Sie%20uns%20eine%20kurze%20R%C3%BCckmeldung%20zum%20weiteren%20Vorgehen.%0D%0A%0D%0AViele%20Gr%C3%BC%C3%9Fe">📧 Bedenkenanmeldung öffnen</a>
+        </div>
+
+        <div class="note-card">
+            Mailto-Vorlagen sind praktisch für den Start. Für den Live-Betrieb besser zentrale SharePoint-/Hotelkit-Vorlagen verlinken, damit Texte nur an einer Stelle gepflegt werden.
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 7. TÜV / SV -->
+    <div id="view-tuev" class="view">
+        <h1 class="large-title">Brandschutz & SV</h1>
+        <div class="note-card"><b>Wichtig:</b> Prüfintervalle immer gegen letzten Prüfbericht, Bundesland, Genehmigungsunterlagen und Brandschutzkonzept prüfen. Der rote Faden ist Orientierung, nicht alleinige Rechtsquelle.</div>
+
+        <div class="list-header">Der Rote Ordner</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Inhalt (Muss griffbereit sein)</div>
+                        <div class="item-desc">Brandschutzkonzept, Fluchtpläne, ASUC-Prüfbescheinigung, Baugenehmigung, aktuelle Wartungsprotokolle & SV-Berichte, Feuerwehrplan.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="list-header">Gesetzliche SV-Prüfzyklen</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Brandmeldeanlage (BMA)</div>
+                        <div class="item-desc">Alle 3 Jahre & Feuerwehrpläne</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • <b>Prüfung durch SV:</b> Alle 3 Jahre.<br>
+                    • <b>Jährliche Wartung:</b> Durch Fachfirma.<br>
+                    • <b>WICHTIG:</b> Während der Wartung müssen die hinterlegten Feuerwehrpläne per Sichtkontrolle mit den Kontaktdaten der Brandschutzordnung Teil C abgeglichen werden!
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Feststellanlagen (FSA)</div>
+                        <div class="item-desc">Wartung durch Fachkraft: Jährlich. (Betreiber-Prüfung: Monatlich).</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-content">
+                        <div class="item-title">Lüftung & Sicherheitsbeleuchtung</div>
+                        <div class="item-desc">Prüfung durch SV: Beide Anlagen alle 3 Jahre.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Organisation SV-Prüfung in Hotelkit</div>
+                        <div class="item-desc">Aufgaben-Automatisierung</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Spätestens <b>6 Monate vor Fälligkeit</b> der SV-Prüfung muss die Aufgabe in Hotelkit angelegt und 3 Angebote eingeholt werden!<br><br>
+                    Vorlage: "Wiederkehrende SV-Prüfung".<br>
+                    Empfänger: GM + Techniker.<br>
+                    Abonnenten: Regional Operations Manager + FM-Gruppe.
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Brandschutz Sonderfälle</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Feueralarm (Nachbereitung)</div>
+                        <div class="item-desc">Vorfallbericht erstellen</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Nach <b>jedem</b> Feueralarm muss spätestens am Folgetag ein Vorfallbericht in Hotelkit (Kategorie "Brandschutz", Vorlage nutzen) erstellt werden.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">BMA / Melder Abschaltung</div>
+                        <div class="item-desc">Doku & PDF Ablage</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Abschaltungen müssen zwingend dokumentiert werden. <br>
+                    Hotelkit-Vorlage: "Brandmelderanlage Abschaltung / Änderung an BMZ".<br>
+                    Das PDF muss auf dem S-Laufwerk unter "Brandschutzrelevante Themen" abgelegt werden.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Evakuierungsübungen</div>
+                        <div class="item-desc">Jährlich & Feuerwehr-Achtung!</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Mindestens 1x jährlich durchzuführen (Vorgabe u.a. IHG).<br><br>
+                    <b>WICHTIGER HINWEIS:</b> Vor der Übung muss der Hauptmelder bei der Meldestelle abgemeldet werden. Rückt die Feuerwehr versehentlich an, werden die Einsatzkosten in Rechnung gestellt!
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 8. ADMIN & ORGA -->
+    <div id="view-admin" class="view">
+        <h1 class="large-title">Admin & Orga</h1>
+        
+        <div class="list-header">Inventur & Planung</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Wartungskalender & Allinvos</div>
+                        <div class="item-desc">Vertragsmanagement</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    • <b>Allinvos:</b> Alle Wartungsverträge liegen in Allinvos. Zugang erfolgt über die mr@... Mailadresse.<br>
+                    • <b>Wartungskalender:</b> Wartungstermine müssen im Vorjahr gemeinsam mit dem GM bis Ende Oktober für das Folgejahr geplant werden. Finale Abstimmung im Januar.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">Werkzeuginventur</div>
+                        <div class="item-desc">Quartalsweise Kontrolle</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Der Werkzeugbestand (vorrangig Maschinen) ist <b>quartalsweise</b> sowie bei jedem Personalwechsel einer Inventur zu unterziehen.<br>
+                    Hierfür die Hotelkit-Aufgabe "Inventur Werkzeug Quartal" nutzen.
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- 9. EINKAUF -->
+    <div id="view-einkauf" class="view">
+        <h1 class="large-title">Einkauf & Partner</h1>
+        <p class="subtitle">Zugangsdaten für Webshops liegen auf der mr@... Mailadresse.</p>
+
+        <div class="list-header">Online-Shops</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-icon">🚰</div>
+                    <div class="item-content">
+                        <div class="item-title">derExpress</div>
+                        <div class="item-desc">Sanitärbedarf Shop</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-icon">⚡</div>
+                    <div class="item-content">
+                        <div class="item-title">Yesss</div>
+                        <div class="item-desc">Elektrobedarf Shop</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main">
+                    <div class="item-icon">🧰</div>
+                    <div class="item-content">
+                        <div class="item-title">Safeline</div>
+                        <div class="item-desc">Werkzeug & Verbrauchsmaterial</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="list-header">Direkt-Kontakte</div>
+        <div class="list-group">
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">MEGA-Farben (Michael Arendt)</div>
+                        <div class="item-desc">Wandfarben & Lacke</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Bestellung per Mail an: <b>michael.arendt@mega.de</b><br>
+                    • FM immer in CC setzen!<br>
+                    • Betreff zwingend: <b>Tristar/HOTELCODE</b><br>
+                    • Farbcodes (RAL/NCS) liegen im S-Laufwerk unter Interior Design (#08_Bau_Opening).<br>
+                    • Bei Unsicherheit kann Herr Arendt einen Anwendungstechniker ins Haus schicken.
+                </div>
+            </div>
+            <div class="list-item">
+                <div class="item-main" onclick="toggleAccordion(this)">
+                    <div class="item-content">
+                        <div class="item-title blue-link">HTM GmbH & Co. KG (RLT-Filter)</div>
+                        <div class="item-desc">Filtermaterialien Lüftung</div>
+                    </div>
+                    <div class="chevron">›</div>
+                </div>
+                <div class="item-details">
+                    Grundlage der Bestellung sind alte Rechnungen.<br>
+                    <b>Kontakt:</b> Felix Landsberg<br>
+                    <b>Mail:</b> flandsberg@htm-shop.de<br>
+                    <b>Tel:</b> 06571 / 958 96 - 61
+                </div>
+            </div>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+</div>
+
+
+    <!-- Added: TODAY COCKPIT -->
+    <div id="view-heute" class="view">
+        <h1 class="large-title">Heute</h1>
+        <p class="subtitle" id="today-subtitle">Tagescockpit für Standardaufgaben. Keine Rechtsprüfung – konkrete Vorgaben aus Prüfbericht, Brandschutzkonzept und Hotelkit bleiben maßgeblich.</p>
+
+        <div class="top-actions">
+            <button class="primary-btn" onclick="openView('view-zimmerwartung', 'Zimmerwartung')">Zimmerwartung starten</button>
+            <button class="soft-btn" onclick="openSetup(true)">Hotelprofil ändern</button>
+        </div>
+
+        <div class="today-grid">
+            <div class="today-card red">
+                <h3>Sicherheit zuerst</h3>
+                <p>Technikräume, öffentliche Flure, Treppenhäuser und Brandlasten prüfen. Bei Personengefahr: erst sichern, dann GM/FM/Operations informieren.</p>
+            </div>
+            <div class="today-card">
+                <h3>Zähler & Auffälligkeiten</h3>
+                <p>Gas, Wasser, Strom und Wärme/Kälte nach Vorgabe erfassen. Ungewöhnliche Sprünge direkt notieren und nicht nur „abhaken“.</p>
+            </div>
+            <div class="today-card orange">
+                <h3>Trinkwasser im Blick</h3>
+                <p>Unbenutzte Zapfstellen und Zimmer nach 72h-Regel spülen, Temperaturen beachten und Nachweise sauber ablegen.</p>
+            </div>
+            <div class="today-card green">
+                <h3>Zimmerwartung als Routine</h3>
+                <p>Pro Rundgang einzelne Zimmer dokumentiert prüfen. Gespeicherte Zimmer bleiben je nach Einstellung grün; Gesamtbericht als PDF exportieren.</p>
+            </div>
+        </div>
+
+        <div class="note-card">
+            <b>Eigene Idee:</b> Nutze die Zimmerwartung nicht als „Extraarbeit“, sondern als rollierende Qualitätskontrolle. Jeden Tag wenige Zimmer sauber dokumentieren – dadurch entstehen bessere Nachweise und weniger Überraschungen vor Audits oder Begehungen.
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- Added: ROOM MAINTENANCE -->
+    <div id="view-zimmerwartung" class="view">
+        <h1 class="large-title">Zimmerwartung</h1>
+        <p class="subtitle">Etagen ausklappen, Zimmer wählen, Wartung dokumentieren. Gespeichert wird lokal im Browser.</p>
+
+        <div class="progress-wrap">
+            <div class="progress-text" id="room-maintenance-status">Hotelprofil wird geladen…</div>
+            <div class="progress-bar"><span id="room-progress-bar"></span></div>
+        </div>
+
+        <div class="overview-legend">
+            <span class="legend-chip done">Grün = gültig</span>
+            <span class="legend-chip expired">Orange = abgelaufen</span>
+            <span class="legend-chip open">Weiß = offen</span>
+        </div>
+
+        <div id="floor-accordion-list"></div>
+
+        <div class="room-selected-banner" id="selected-room-banner" style="display:none;">
+            <div><span style="opacity:.65;font-size:12px;font-weight:800;text-transform:uppercase;">Ausgewählt</span><br><b id="selected-room-title">Zimmer</b></div>
+            <button class="soft-btn" style="box-shadow:none;" onclick="closeMaintenanceForm()">Zimmerliste</button>
+        </div>
+
+        <div class="form-card" id="maintenance-form-card" style="display:none;">
+            <div class="form-row">
+                <label>Durchgeführt von</label>
+                <input id="maintenance-person" placeholder="Name Haustechnik" oninput="saveCurrentPersonDraft()">
+            </div>
+            <div class="form-row">
+                <label>Checkliste mit Problem/Bemerkung je Punkt</label>
+                <button class="quick-ok-btn" type="button" onclick="markAllChecksOk()">✓ Alles auf OK setzen</button>
+                <div id="maintenance-checklist"></div>
+            </div>
+            <div class="form-row">
+                <label>Gesamtbemerkung / Folgemaßnahme</label>
+                <textarea id="maintenance-notes" placeholder="z. B. Hotelkit-Auftrag erstellt, Mangelmeldung nötig, Ersatzteil bestellt…"></textarea>
+            </div>
+            <div class="top-actions" style="margin: 0 0 12px;">
+                <button class="primary-btn" onclick="saveMaintenanceRecord()">Speichern & schließen</button>
+                <button class="soft-btn" onclick="openView('view-einstellungen', 'Einstellungen')">Checkliste bearbeiten</button>
+            </div>
+            <button class="danger-btn" style="width:100%;" onclick="resetCurrentRoomRecord()">Zimmercheck zurücksetzen</button>
+        </div>
+
+        <div class="top-actions">
+            <button class="primary-btn" onclick="exportMaintenanceReport()">Gesamtbericht als PDF</button>
+            <button class="soft-btn" onclick="openView('view-einstellungen', 'Einstellungen')">Einstellungen</button>
+        </div>
+
+        <div class="note-card">
+            <b>Ablage:</b> Der PDF-Export erzeugt einen Gesamtbericht: Seite 1 farbliche Zimmerübersicht, danach je erledigtem Zimmer ein Protokoll. Im Druckdialog „Als PDF speichern“ wählen und zentral ablegen.
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+    <!-- Added: SETTINGS -->
+    <div id="view-einstellungen" class="view">
+        <h1 class="large-title">Einstellungen</h1>
+        <p class="subtitle">Hotelprofil, Gültigkeit der Zimmerwartung, Checkliste und Backup. Alles wird lokal im Browser gespeichert.</p>
+
+        <div class="settings-section-title">Hotelprofil</div>
+        <div class="form-card">
+            <div class="form-row"><label>Hotelcode</label><input id="settings-hotelcode" placeholder="z. B. BERES" maxlength="8" style="text-transform:uppercase;"></div>
+            <div class="form-row"><label>Etagen und Zimmeranzahl</label><div id="settings-floors"></div><button class="soft-btn" style="width:100%; margin-top:8px;" onclick="addSettingsFloorRow()">Etage hinzufügen</button></div>
+            <button class="primary-btn" style="width:100%;" onclick="saveSettingsHotelProfile()">Hotelprofil speichern</button>
+        </div>
+
+        <div class="settings-section-title">Zimmerwartung</div>
+        <div class="form-card">
+            <div class="form-row"><label>Zimmer bleibt grün für X Monate</label><input id="settings-valid-months" type="number" min="1" max="36" value="6"></div>
+            <div class="form-row"><label>Standardname „Durchgeführt von“</label><input id="settings-person" placeholder="Name Haustechnik"></div>
+            <button class="primary-btn" style="width:100%;" onclick="saveSettingsMaintenance()">Wartungseinstellungen speichern</button>
+        </div>
+
+        <div class="settings-section-title">Checkliste bearbeiten</div>
+        <div class="form-card">
+            <p class="item-desc" style="margin-top:0;">Änderungen gelten für neue und noch nicht gespeicherte Zimmerchecks. Bereits gespeicherte Protokolle behalten ihre damalige Checkliste.</p>
+            <div id="checklist-editor"></div>
+            <div class="top-actions" style="margin: 12px 0 0;">
+                <button class="soft-btn" onclick="addChecklistItem()">Punkt hinzufügen</button>
+                <button class="primary-btn" onclick="saveChecklistTemplate()">Checkliste speichern</button>
+            </div>
+        </div>
+
+        <div class="settings-section-title">Sicherung / App-Update</div>
+        <div class="form-card">
+            <p class="item-desc" style="margin-top:0;">Sichert Hotelprofil, Etagen, Checkliste, Wartungsintervall, Standardname und gespeicherte Zimmerwartungen als Datei.</p>
+            <div class="top-actions" style="margin: 0 0 12px;">
+                <button class="primary-btn" onclick="saveBackupFile()">Sicherung speichern unter…</button>
+                <button class="soft-btn" onclick="openBackupFile()">Sicherung öffnen…</button>
+            </div>
+            <input id="backup-file-input" class="file-input-hidden" type="file" accept="application/json,.json" onchange="handleBackupFileSelected(event)">
+            <p class="item-desc">Empfehlung: Sicherung nach jeder größeren Änderung oder vor einem App-Update erzeugen und zentral ablegen.</p>
+        </div>
+        <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
+    </div>
+
+<script>
+    // Navigation Logic
+    const headerTitle = document.getElementById('header-title');
+    const backBtn = document.getElementById('back-btn');
+
+    function openView(viewId, title) {
+        document.querySelectorAll('.view').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none'; 
+        });
+        
+        const target = document.getElementById(viewId);
+        target.style.display = 'block';
+        
+        requestAnimationFrame(() => {
+            target.classList.add('active');
+        });
+
+        headerTitle.innerText = title;
+        headerTitle.style.opacity = '1';
+        backBtn.style.display = 'flex';
+        window.scrollTo(0, 0);
+    }
+
+    function goHome() {
+        document.querySelectorAll('.view').forEach(el => {
+            el.classList.remove('active');
+            el.style.display = 'none';
+        });
+        
+        const home = document.getElementById('view-home');
+        home.style.display = 'block';
+        
+        requestAnimationFrame(() => {
+            home.classList.add('active');
+        });
+
+        headerTitle.style.opacity = '0'; 
+        backBtn.style.display = 'none';
+        window.scrollTo(0, 0);
+    }
+
+    // Accordion Logic
+    function toggleAccordion(el) {
+        const content = el.nextElementSibling;
+        const chevron = el.querySelector('.chevron');
+        if (content.style.display === "block") {
+            content.style.display = "none";
+            chevron.style.transform = "rotate(0deg)";
+        } else {
+            content.style.display = "block";
+            chevron.style.transform = "rotate(90deg)";
+        }
+    }
+
+
+    // Home Search Logic: searches tiles and list items, then opens the matching view
+    function filterContent(query) {
+        query = query.toLowerCase().trim();
+        const resultBox = document.getElementById('search-results');
+        const tiles = document.querySelectorAll('#home-grid .tile');
+
+        tiles.forEach(tile => {
+            const text = tile.innerText.toLowerCase();
+            tile.style.display = (!query || text.includes(query)) ? '' : 'none';
+        });
+
+        resultBox.innerHTML = '';
+        if (!query) {
+            resultBox.style.display = 'none';
+            return;
+        }
+
+        const results = [];
+        document.querySelectorAll('.view:not(#view-home)').forEach(view => {
+            const viewId = view.id;
+            const title = view.querySelector('.large-title')?.innerText || 'Bereich';
+            view.querySelectorAll('.list-item').forEach(item => {
+                const text = item.innerText.replace(/\s+/g, ' ').trim();
+                if (text.toLowerCase().includes(query)) {
+                    results.push({ viewId, title, text: text.slice(0, 115) });
+                }
+            });
+        });
+
+        results.slice(0, 8).forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'search-result';
+            div.innerHTML = `<b>${r.title}</b><span>${r.text}…</span>`;
+            div.onclick = () => openView(r.viewId, r.title);
+            resultBox.appendChild(div);
+        });
+
+        resultBox.style.display = results.length ? 'block' : 'none';
+    }
+
+    // Edge Swipe to Go Back Logic (Native feel)
+    let touchstartX = 0;
+    let touchstartY = 0;
+    let touchendX = 0;
+    let touchendY = 0;
+
+    const appContainer = document.getElementById('app-container');
+
+    appContainer.addEventListener('touchstart', function(event) {
+        touchstartX = event.changedTouches[0].screenX;
+        touchstartY = event.changedTouches[0].screenY;
+    }, false);
+
+    appContainer.addEventListener('touchend', function(event) {
+        touchendX = event.changedTouches[0].screenX;
+        touchendY = event.changedTouches[0].screenY;
+        handleGesture();
+    }, false);
+
+    function handleGesture() {
+        // Swipe properties
+        const isSwipeRight = (touchendX - touchstartX) > 75; // Minimum horizontal swipe distance
+        const isFromLeftEdge = touchstartX < 40; // Swipe must start close to the left edge of the screen
+        const isHorizontalSwipe = Math.abs(touchendY - touchstartY) < 50; // Ensure it's not a vertical scroll
+
+        // If it's a valid edge-swipe to the right
+        if (isSwipeRight && isFromLeftEdge && isHorizontalSwipe) {
+            const homeView = document.getElementById('view-home');
+            // Trigger goHome only if we are currently not on the home screen
+            if (!homeView.classList.contains('active')) {
+                goHome();
+            }
+        }
+    }
+
+    // Added v2: persistent hotel setup, settings, backup and room maintenance
+    const STORAGE_KEYS = {
+        setup: 'tristarCare.hotelSetup.v2',
+        checklist: 'tristarCare.roomChecklist.v2',
+        records: 'tristarCare.roomMaintenanceRecords.v2',
+        person: 'tristarCare.maintenancePerson.v2',
+        validMonths: 'tristarCare.roomValidMonths.v2'
+    };
+
+    const DEFAULT_CHECKLIST = [
+        'Rundgang im Zimmer: sichtbare Schäden, Geruch, Sauberkeit und offensichtliche Mängel prüfen',
+        'Alle Armaturen prüfen: Waschtisch, Dusche/Wanne, WC-Spülung, Dichtheit und Ablauf',
+        'Fancoil reinigen: Filter prüfen/absaugen, Ausblas-/Ansaugbereich prüfen, Kondensat/Auffälligkeiten notieren',
+        'TV einschalten: Bild, Ton, Fernbedienung, Sender/Hotelinfo und Netzwerkfunktion prüfen',
+        'Möbel prüfen: lose Teile, Beschläge, Scharniere, Stuhl, Tisch, Bett, Kopfteil und Schrank',
+        'Fenster prüfen: Griff, Kippstellung, Dichtung, sichtbare Beschläge und sichere Funktion',
+        'Licht und Steckdosen sichtbar prüfen: Leuchtmittel, Schalter, Leselampen, USB/Steckdosen ohne Beschädigung',
+        'Mängel dokumentieren: Bemerkung eintragen und bei Bedarf Hotelkit-Auftrag / Mangelmeldung erstellen'
+    ];
+
+    let selectedRoom = null;
+    let selectedFloorIndex = null;
+
+    function loadJson(key, fallback) {
+        try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+        catch(e) { return fallback; }
+    }
+    function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+    function escapeHtml(value) { return String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+    function migrateOldStorage() {
+        const oldSetup = loadJson('tristarCare.hotelSetup.v1', null);
+        const oldChecklist = loadJson('tristarCare.roomChecklist.v1', null);
+        const oldRecords = loadJson('tristarCare.roomMaintenanceRecords.v1', null);
+        const oldPerson = localStorage.getItem('tristarCare.maintenancePerson.v1');
+        if (!getHotelSetup() && oldSetup) saveJson(STORAGE_KEYS.setup, oldSetup);
+        if (!loadJson(STORAGE_KEYS.checklist, null) && oldChecklist) saveJson(STORAGE_KEYS.checklist, oldChecklist);
+        if (Object.keys(getRecords()).length === 0 && oldRecords) saveJson(STORAGE_KEYS.records, oldRecords);
+        if (!localStorage.getItem(STORAGE_KEYS.person) && oldPerson) localStorage.setItem(STORAGE_KEYS.person, oldPerson);
+    }
+
+    function getHotelSetup() { return loadJson(STORAGE_KEYS.setup, null); }
+    function getChecklistTemplate() {
+        const stored = loadJson(STORAGE_KEYS.checklist, null);
+        return Array.isArray(stored) && stored.length ? stored : DEFAULT_CHECKLIST;
+    }
+    function getRecords() { return loadJson(STORAGE_KEYS.records, {}); }
+    function getValidMonths() { return Number(localStorage.getItem(STORAGE_KEYS.validMonths) || 6); }
+    function roomKey(room) { return `${getHotelSetup()?.hotelcode || 'HOTEL'}-${room}`; }
+    function generateRoomsForFloor(floor) {
+        const prefix = String(floor.floor).trim();
+        return Array.from({length: Number(floor.count || 0)}, (_, i) => `${prefix}${String(i + 1).padStart(2, '0')}`);
+    }
+    function addMonths(date, months) {
+        const d = new Date(date);
+        d.setMonth(d.getMonth() + Number(months || 6));
+        return d;
+    }
+    function recordStatus(room) {
+        const rec = getRecords()[roomKey(room)];
+        if (!rec) return 'open';
+        const validUntil = rec.validUntil ? new Date(rec.validUntil) : addMonths(rec.date, getValidMonths());
+        return validUntil >= new Date() ? 'done' : 'expired';
+    }
+
+    function defaultFloors() {
+        return [1,2,3,4,5,6].map(f => ({floor: String(f), count: 20}));
+    }
+
+    function openSetup(canCancel = true) {
+        const setup = getHotelSetup();
+        document.getElementById('setup-hotelcode').value = setup?.hotelcode || '';
+        document.getElementById('setup-valid-months').value = getValidMonths();
+        const wrap = document.getElementById('setup-floors');
+        wrap.innerHTML = '';
+        (setup?.floors?.length ? setup.floors : defaultFloors()).forEach(f => addSetupFloorRow(f.floor, f.count));
+        document.getElementById('setup-cancel-btn').style.display = canCancel ? 'block' : 'none';
+        document.getElementById('setup-overlay').style.display = 'flex';
+    }
+    function closeSetup() { document.getElementById('setup-overlay').style.display = 'none'; }
+    function addSetupFloorRow(floor = '', count = '') {
+        const wrap = document.getElementById('setup-floors');
+        const row = document.createElement('div');
+        row.className = 'floor-row';
+        row.innerHTML = `<input class="setup-floor" placeholder="Etage" value="${escapeHtml(floor)}"><input class="setup-count" placeholder="Zimmeranzahl" type="number" min="1" value="${escapeHtml(count)}"><button class="round-icon-btn" onclick="this.parentElement.remove()">×</button>`;
+        wrap.appendChild(row);
+    }
+    function saveSetup() {
+        const hotelcode = document.getElementById('setup-hotelcode').value.trim().toUpperCase();
+        const rows = [...document.querySelectorAll('#setup-floors .floor-row')];
+        const floors = rows.map(row => ({ floor: row.querySelector('.setup-floor').value.trim(), count: Number(row.querySelector('.setup-count').value) })).filter(f => f.floor !== '' && f.count > 0);
+        if (!hotelcode || floors.length === 0) { alert('Bitte Hotelcode und mindestens eine Etage mit Zimmeranzahl eintragen.'); return; }
+        saveJson(STORAGE_KEYS.setup, { hotelcode, floors, updatedAt: new Date().toISOString() });
+        localStorage.setItem(STORAGE_KEYS.validMonths, Number(document.getElementById('setup-valid-months').value || 6));
+        closeSetup(); initRoomMaintenance(); updateTodaySubtitle(); loadSettingsPage();
+    }
+
+    function updateTodaySubtitle() {
+        const setup = getHotelSetup();
+        const today = new Date().toLocaleDateString('de-DE', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' });
+        const target = document.getElementById('today-subtitle');
+        if (target) target.innerText = `${today} · ${setup?.hotelcode || 'Hotel noch nicht eingerichtet'} · Tagescockpit für Standardaufgaben.`;
+    }
+
+    function initRoomMaintenance() {
+        const setup = getHotelSetup();
+        const person = localStorage.getItem(STORAGE_KEYS.person) || '';
+        const personInput = document.getElementById('maintenance-person');
+        if (personInput) personInput.value = person;
+        renderFloorAccordions();
+        renderChecklistEditor();
+        updateMaintenanceProgress();
+        loadSettingsPage();
+    }
+
+    function renderFloorAccordions(openIndex = selectedFloorIndex) {
+        const setup = getHotelSetup();
+        const host = document.getElementById('floor-accordion-list');
+        if (!host) return;
+        host.innerHTML = '';
+        if (!setup) {
+            document.getElementById('room-maintenance-status').innerText = 'Bitte zuerst Hotelprofil anlegen.';
+            return;
+        }
+        setup.floors.forEach((floor, idx) => {
+            const rooms = generateRoomsForFloor(floor);
+            const done = rooms.filter(r => recordStatus(r) === 'done').length;
+            const expired = rooms.filter(r => recordStatus(r) === 'expired').length;
+            const acc = document.createElement('div');
+            acc.className = 'floor-accordion' + (idx === openIndex ? ' open' : '');
+            acc.innerHTML = `<button class="floor-head" onclick="toggleFloor(${idx})"><div>Etage ${escapeHtml(floor.floor)}<br><span>${done} gültig · ${expired} abgelaufen · ${rooms.length} Zimmer</span></div><div class="chevron chev">›</div></button><div class="floor-body"><div class="room-pill-grid"></div></div>`;
+            const grid = acc.querySelector('.room-pill-grid');
+            rooms.forEach(room => {
+                const btn = document.createElement('button');
+                const status = recordStatus(room);
+                btn.className = `room-pill ${status}` + (room === selectedRoom ? ' active' : '');
+                btn.textContent = room;
+                btn.onclick = () => selectRoom(room, idx);
+                grid.appendChild(btn);
+            });
+            host.appendChild(acc);
+        });
+    }
+    function toggleFloor(idx) {
+        selectedFloorIndex = selectedFloorIndex === idx ? null : idx;
+        closeMaintenanceForm(false);
+        renderFloorAccordions(selectedFloorIndex);
+    }
+    function closeMaintenanceForm(showList = true) {
+        document.getElementById('maintenance-form-card').style.display = 'none';
+        document.getElementById('selected-room-banner').style.display = 'none';
+        if (showList) selectedRoom = null;
+        renderFloorAccordions(selectedFloorIndex);
+    }
+    function selectRoom(room, floorIdx) {
+        selectedRoom = room;
+        selectedFloorIndex = null;
+        document.querySelectorAll('.floor-accordion').forEach(el => el.classList.remove('open'));
+        document.getElementById('floor-accordion-list').innerHTML = '';
+        document.getElementById('selected-room-title').innerText = `Zimmer ${room}`;
+        document.getElementById('selected-room-banner').style.display = 'flex';
+        const records = getRecords();
+        const record = records[roomKey(room)];
+        document.getElementById('maintenance-form-card').style.display = 'block';
+        document.getElementById('maintenance-notes').value = record?.notes || '';
+        document.getElementById('maintenance-person').value = record?.person || localStorage.getItem(STORAGE_KEYS.person) || '';
+        renderMaintenanceChecklist(record);
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function renderMaintenanceChecklist(record = null) {
+        const box = document.getElementById('maintenance-checklist');
+        if (!box) return;
+        box.innerHTML = '';
+        const template = record?.checklist || getChecklistTemplate();
+        const checks = record?.checks || {};
+        template.forEach((text, idx) => {
+            const status = checks[idx]?.status || (checks[idx] === true ? 'ok' : 'open');
+            const note = checks[idx]?.note || '';
+            const card = document.createElement('div');
+            card.className = 'check-card' + (status === 'problem' ? ' problem' : '') + (note ? ' note-open' : '');
+            card.innerHTML = `
+                <div class="check-title">${escapeHtml(text)}</div>
+                <div class="check-options">
+                    <label><input type="radio" name="check-${idx}" value="ok" ${status === 'ok' ? 'checked' : ''} onchange="toggleIssueNote(this)">OK</label>
+                    <label><input type="radio" name="check-${idx}" value="problem" ${status === 'problem' ? 'checked' : ''} onchange="toggleIssueNote(this)">Problem</label>
+                    <label><input type="radio" name="check-${idx}" value="na" ${status === 'na' ? 'checked' : ''} onchange="toggleIssueNote(this)">n. a.</label>
+                </div>
+                <textarea class="issue-note" data-check-index="${idx}" placeholder="Problem / Bemerkung zu diesem Punkt…">${escapeHtml(note)}</textarea>`;
+            box.appendChild(card);
+        });
+    }
+    function toggleIssueNote(input) {
+        const card = input.closest('.check-card');
+        const note = card.querySelector('.issue-note');
+        card.classList.toggle('problem', input.value === 'problem');
+        if (input.value === 'problem' || note.value.trim()) note.style.display = 'block';
+        else note.style.display = 'none';
+    }
+    function markAllChecksOk() {
+        document.querySelectorAll('#maintenance-checklist .check-card').forEach((card, idx) => {
+            const ok = card.querySelector(`input[name="check-${idx}"][value="ok"]`);
+            if (ok) ok.checked = true;
+            card.classList.remove('problem');
+            const note = card.querySelector('.issue-note');
+            if (note && !note.value.trim()) note.style.display = 'none';
+        });
+    }
+    function collectChecks() {
+        const checks = {};
+        document.querySelectorAll('#maintenance-checklist .check-card').forEach((card, idx) => {
+            const selected = card.querySelector(`input[name="check-${idx}"]:checked`);
+            const note = card.querySelector('.issue-note')?.value.trim() || '';
+            checks[idx] = { status: selected?.value || 'open', note };
+        });
+        return checks;
+    }
+    function saveCurrentPersonDraft() {
+        const val = document.getElementById('maintenance-person')?.value.trim();
+        if (val !== undefined) localStorage.setItem(STORAGE_KEYS.person, val);
+    }
+    function saveMaintenanceRecord() {
+        if (!selectedRoom) { alert('Bitte zuerst ein Zimmer auswählen.'); return; }
+        const person = document.getElementById('maintenance-person').value.trim();
+        if (!person) { alert('Bitte „Durchgeführt von“ eintragen.'); return; }
+        const notes = document.getElementById('maintenance-notes').value.trim();
+        const now = new Date();
+        localStorage.setItem(STORAGE_KEYS.person, person);
+        const records = getRecords();
+        records[roomKey(selectedRoom)] = {
+            hotelcode: getHotelSetup()?.hotelcode,
+            room: selectedRoom,
+            date: now.toISOString(),
+            validUntil: addMonths(now, getValidMonths()).toISOString(),
+            person,
+            notes,
+            checklist: getChecklistTemplate(),
+            checks: collectChecks()
+        };
+        saveJson(STORAGE_KEYS.records, records);
+        const savedRoom = selectedRoom;
+        selectedRoom = null;
+        closeMaintenanceForm(false);
+        selectedFloorIndex = null;
+        renderFloorAccordions(null);
+        updateMaintenanceProgress();
+        alert(`Zimmer ${savedRoom} gespeichert. Es bleibt ${getValidMonths()} Monate grün.`);
+    }
+    function resetCurrentRoomRecord() {
+        if (!selectedRoom) return;
+        if (!confirm(`Zimmercheck ${selectedRoom} wirklich zurücksetzen?`)) return;
+        const records = getRecords();
+        delete records[roomKey(selectedRoom)];
+        saveJson(STORAGE_KEYS.records, records);
+        closeMaintenanceForm(); updateMaintenanceProgress();
+    }
+    function updateMaintenanceProgress() {
+        const setup = getHotelSetup();
+        const status = document.getElementById('room-maintenance-status');
+        const bar = document.getElementById('room-progress-bar');
+        if (!setup || !status || !bar) return;
+        const allRooms = setup.floors.flatMap(generateRoomsForFloor);
+        const done = allRooms.filter(r => recordStatus(r) === 'done').length;
+        const expired = allRooms.filter(r => recordStatus(r) === 'expired').length;
+        const pct = allRooms.length ? Math.round(done / allRooms.length * 100) : 0;
+        status.innerText = `${setup.hotelcode}: ${done} gültig, ${expired} abgelaufen, ${allRooms.length - done - expired} offen · Gültigkeit ${getValidMonths()} Monate.`;
+        bar.style.width = `${pct}%`;
+    }
+
+    function renderChecklistEditor() {
+        const box = document.getElementById('checklist-editor');
+        if (!box) return;
+        box.innerHTML = '';
+        getChecklistTemplate().forEach(text => {
+            const row = document.createElement('div');
+            row.className = 'checklist-edit-row';
+            row.innerHTML = `<input class="checklist-edit-input" value="${escapeHtml(text)}"><button class="round-icon-btn" onclick="this.parentElement.remove()">×</button>`;
+            box.appendChild(row);
+        });
+    }
+    function addChecklistItem() {
+        const box = document.getElementById('checklist-editor');
+        const row = document.createElement('div');
+        row.className = 'checklist-edit-row';
+        row.innerHTML = `<input class="checklist-edit-input" placeholder="Neuer Prüfpunkt"><button class="round-icon-btn" onclick="this.parentElement.remove()">×</button>`;
+        box.appendChild(row);
+    }
+    function saveChecklistTemplate() {
+        const items = [...document.querySelectorAll('.checklist-edit-input')].map(i => i.value.trim()).filter(Boolean);
+        if (items.length === 0) { alert('Die Checkliste darf nicht leer sein.'); return; }
+        saveJson(STORAGE_KEYS.checklist, items); renderChecklistEditor(); alert('Checkliste gespeichert.');
+    }
+
+    function loadSettingsPage() {
+        const setup = getHotelSetup();
+        const hotel = document.getElementById('settings-hotelcode');
+        if (!hotel) return;
+        hotel.value = setup?.hotelcode || '';
+        document.getElementById('settings-valid-months').value = getValidMonths();
+        document.getElementById('settings-person').value = localStorage.getItem(STORAGE_KEYS.person) || '';
+        const wrap = document.getElementById('settings-floors');
+        wrap.innerHTML = '';
+        (setup?.floors?.length ? setup.floors : defaultFloors()).forEach(f => addSettingsFloorRow(f.floor, f.count));
+        renderChecklistEditor();
+    }
+    function addSettingsFloorRow(floor = '', count = '') {
+        const wrap = document.getElementById('settings-floors');
+        const row = document.createElement('div');
+        row.className = 'floor-row';
+        row.innerHTML = `<input class="settings-floor" placeholder="Etage" value="${escapeHtml(floor)}"><input class="settings-count" placeholder="Zimmeranzahl" type="number" min="1" value="${escapeHtml(count)}"><button class="round-icon-btn" onclick="this.parentElement.remove()">×</button>`;
+        wrap.appendChild(row);
+    }
+    function saveSettingsHotelProfile() {
+        const hotelcode = document.getElementById('settings-hotelcode').value.trim().toUpperCase();
+        const floors = [...document.querySelectorAll('#settings-floors .floor-row')].map(row => ({ floor: row.querySelector('.settings-floor').value.trim(), count: Number(row.querySelector('.settings-count').value) })).filter(f => f.floor && f.count > 0);
+        if (!hotelcode || floors.length === 0) { alert('Bitte Hotelcode und mindestens eine Etage eintragen.'); return; }
+        saveJson(STORAGE_KEYS.setup, { hotelcode, floors, updatedAt: new Date().toISOString() });
+        initRoomMaintenance(); updateTodaySubtitle(); alert('Hotelprofil gespeichert.');
+    }
+    function saveSettingsMaintenance() {
+        const months = Math.max(1, Math.min(36, Number(document.getElementById('settings-valid-months').value || 6)));
+        localStorage.setItem(STORAGE_KEYS.validMonths, months);
+        localStorage.setItem(STORAGE_KEYS.person, document.getElementById('settings-person').value.trim());
+        initRoomMaintenance(); alert('Wartungseinstellungen gespeichert.');
+    }
+
+    function backupPayload() {
+        return {
+            version: 2,
+            exportedAt: new Date().toISOString(),
+            setup: getHotelSetup(),
+            checklist: getChecklistTemplate(),
+            records: getRecords(),
+            person: localStorage.getItem(STORAGE_KEYS.person) || '',
+            validMonths: getValidMonths()
+        };
+    }
+    function applyBackupData(data) {
+        if (!data || typeof data !== 'object') throw new Error('Keine gültige Sicherungsdatei.');
+        if (data.setup) saveJson(STORAGE_KEYS.setup, data.setup);
+        if (Array.isArray(data.checklist)) saveJson(STORAGE_KEYS.checklist, data.checklist);
+        if (data.records) saveJson(STORAGE_KEYS.records, data.records);
+        if (data.person !== undefined) localStorage.setItem(STORAGE_KEYS.person, data.person);
+        if (data.validMonths) localStorage.setItem(STORAGE_KEYS.validMonths, data.validMonths);
+        initRoomMaintenance(); updateTodaySubtitle(); loadSettingsPage();
+    }
+    function saveBackupFile() {
+        const setup = getHotelSetup();
+        const hotel = setup?.hotelcode || 'HOTEL';
+        const date = new Date().toISOString().slice(0,10);
+        const blob = new Blob([JSON.stringify(backupPayload(), null, 2)], {type:'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `TristarCare_${hotel}_Sicherung_${date}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+    }
+    function openBackupFile() {
+        document.getElementById('backup-file-input')?.click();
+    }
+    function handleBackupFileSelected(event) {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const data = JSON.parse(String(reader.result || ''));
+                if (!confirm('Sicherung wirklich einspielen? Aktuelle lokale Daten werden überschrieben.')) return;
+                applyBackupData(data);
+                alert('Sicherung wurde geöffnet und eingespielt.');
+            } catch(e) {
+                alert('Die Datei konnte nicht gelesen werden. Bitte eine gültige Tristar-Care-Sicherung wählen.');
+            } finally {
+                event.target.value = '';
+            }
+        };
+        reader.readAsText(file);
+    }
+    // Alte Funktionsnamen bleiben bewusst als Kompatibilität erhalten.
+    function exportBackup() { saveBackupFile(); }
+    function importBackup() { openBackupFile(); }
+
+    function countProblemsInRecord(rec) {
+        return Object.values(rec?.checks || {}).filter(c => c?.status === 'problem').length;
+    }
+    function reportStatusForRoom(room, records) {
+        const rec = records[roomKey(room)];
+        if (!rec) return {cls:'status-open', label:'offen', problems:0};
+        const problems = countProblemsInRecord(rec);
+        if (problems > 2) return {cls:'status-critical', label:`${problems} Mängel`, problems};
+        if (problems > 0) return {cls:'status-warning', label:`${problems} Mangel`, problems};
+        return {cls:'status-done', label:'OK', problems:0};
+    }
+    function exportMaintenanceReport() {
+        const setup = getHotelSetup();
+        if (!setup) { alert('Bitte zuerst Hotelprofil anlegen.'); return; }
+        const records = getRecords();
+        const allRooms = setup.floors.flatMap(generateRoomsForFloor);
+        const doneRecords = allRooms.map(room => records[roomKey(room)]).filter(Boolean);
+        if (doneRecords.length === 0) { alert('Es gibt noch keine gespeicherten Zimmerwartungen für den Bericht.'); return; }
+
+        const doneCount = doneRecords.length;
+        const okCount = doneRecords.filter(rec => countProblemsInRecord(rec) === 0).length;
+        const warningCount = doneRecords.filter(rec => { const p = countProblemsInRecord(rec); return p > 0 && p <= 2; }).length;
+        const criticalCount = doneRecords.filter(rec => countProblemsInRecord(rec) > 2).length;
+        const openCount = allRooms.length - doneCount;
+        const pct = Math.round(doneCount / allRooms.length * 100);
+
+        const overviewRows = setup.floors.map(floor => {
+            const cells = generateRoomsForFloor(floor).map(room => {
+                const rec = records[roomKey(room)];
+                const info = reportStatusForRoom(room, records);
+                const dateText = rec ? '<br>'+escapeHtml(new Date(rec.date).toLocaleDateString('de-DE')) : '';
+                return `<td class="${info.cls}"><b>${escapeHtml(room)}</b><br><span class="small">${escapeHtml(info.label)}${dateText}</span></td>`;
+            }).join('');
+            return `<tr><th>Etage ${escapeHtml(floor.floor)}</th>${cells}</tr>`;
+        }).join('');
+
+        const roomPages = doneRecords.sort((a,b) => String(a.room).localeCompare(String(b.room), 'de', {numeric:true})).map(rec => {
+            const validUntil = rec.validUntil ? new Date(rec.validUntil) : addMonths(rec.date, getValidMonths());
+            const problems = countProblemsInRecord(rec);
+            const rows = (rec.checklist || []).map((text, idx) => {
+                const c = rec.checks?.[idx] || {};
+                const statusText = c.status === 'ok' ? 'OK' : c.status === 'problem' ? 'Problem' : c.status === 'na' ? 'n. a.' : 'offen';
+                const cls = c.status === 'problem' ? 'status-problem' : '';
+                return `<tr class="${cls}"><td style="width:25mm;">${escapeHtml(statusText)}</td><td>${escapeHtml(text)}</td><td>${escapeHtml(c.note || '')}</td></tr>`;
+            }).join('');
+            const statusText = problems > 2 ? `${problems} Mängel / kritisch nachverfolgen` : problems > 0 ? `${problems} Mangel / nachverfolgen` : 'ohne Problem gespeichert';
+            return `<section class="room-page"><h1>Zimmerwartung · Zimmer ${escapeHtml(rec.room)}</h1><div class="meta"><b>Hotel:</b> ${escapeHtml(rec.hotelcode)} &nbsp; | &nbsp; <b>Datum:</b> ${escapeHtml(new Date(rec.date).toLocaleString('de-DE'))} &nbsp; | &nbsp; <b>Durchgeführt von:</b> ${escapeHtml(rec.person || '-')} &nbsp; | &nbsp; <b>Gültig bis:</b> ${escapeHtml(validUntil.toLocaleDateString('de-DE'))}<br><b>Status:</b> ${escapeHtml(statusText)}</div><table><thead><tr><th>Status</th><th>Prüfpunkt</th><th>Problem / Bemerkung</th></tr></thead><tbody>${rows}</tbody></table><h2>Gesamtbemerkung / Folgemaßnahme</h2><div style="border:1px solid #999; min-height:14mm; padding:5px; white-space:pre-wrap;">${escapeHtml(rec.notes || 'Keine Gesamtbemerkung eingetragen.')}</div></section>`;
+        }).join('');
+
+        document.getElementById('print-report').innerHTML = `<section class="overview-page"><h1>Zimmerwartung · Gesamtbericht</h1><div class="meta"><b>Hotel:</b> ${escapeHtml(setup.hotelcode)} &nbsp; | &nbsp; <b>Export:</b> ${escapeHtml(new Date().toLocaleString('de-DE'))} &nbsp; | &nbsp; <b>Gültigkeit:</b> ${getValidMonths()} Monate ab Durchführung</div><div class="report-kpi"><div class="kpi-box status-done"><b>${doneCount}/${allRooms.length}</b><span>Zimmer erledigt (${pct}%)</span></div><div class="kpi-box status-done"><b>${okCount}</b><span>ohne Mangel</span></div><div class="kpi-box status-warning"><b>${warningCount}</b><span>mit 1–2 Mängeln</span></div><div class="kpi-box status-critical"><b>${criticalCount}</b><span>mit mehr als 2 Mängeln</span></div></div><div class="meta"><b>Legende:</b> Grün = erledigt/alles OK · Gelb/Orange = Mangel notiert · Rot = mehr als 2 Mängel · Grau = offen (${openCount})</div><h2>Zimmerübersicht</h2><table><tbody>${overviewRows}</tbody></table><div class="manager-sign"><b>Digitale Freigabe Manager / GM</b><br><span class="small">Name, Datum oder digitale Freigabe nach internem Ablauf eintragen.</span></div></section>${roomPages}`;
+        window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        migrateOldStorage();
+        updateTodaySubtitle();
+        initRoomMaintenance();
+        if (!getHotelSetup()) openSetup(false);
+    });
+
+</script>
+
+
+<div id="setup-overlay" class="setup-overlay">
+    <div class="setup-modal">
+        <h1 class="large-title">Hotelprofil</h1>
+        <p class="subtitle">Einmalig Hotelcode und Etagen anlegen. Standardmäßig sind 6 Etagen vorbereitet; nicht benötigte Zeilen einfach löschen.</p>
+        <div class="form-card">
+            <div class="form-row">
+                <label>Hotelcode</label>
+                <input id="setup-hotelcode" placeholder="z. B. BERES" maxlength="8" style="text-transform:uppercase;">
+            </div>
+            <div class="form-row">
+                <label>Etagen und Zimmeranzahl</label>
+                <div id="setup-floors"></div>
+                <button class="soft-btn" style="width:100%; margin-top:8px;" onclick="addSetupFloorRow()">Etage hinzufügen</button>
+            </div>
+            <div class="form-row">
+                <label>Zimmer bleibt grün für X Monate</label>
+                <input id="setup-valid-months" type="number" min="1" max="36" value="6">
+            </div>
+            <div class="top-actions" style="margin: 12px 0 0;">
+                <button class="primary-btn" onclick="saveSetup()">Speichern</button>
+                <button class="soft-btn" id="setup-cancel-btn" onclick="closeSetup()">Später</button>
+            </div>
+            <p class="item-desc" style="margin-bottom:0;">Zimmernummern werden automatisch erzeugt: Etage 2 + 24 Zimmer = 201 bis 224.</p>
+        </div>
+    </div>
+</div>
+<div id="print-report"></div>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
+</body>
+</html>
