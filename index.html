@@ -699,6 +699,66 @@
         .round-action .ghost { background:#F2F2F7; color:#111827; }
         .file-input-hidden { display:none; }
 
+
+        /* v5: Zimmerwartung als fokussierter Mobile-Flow */
+        .view { width: 100%; }
+        #view-zimmerwartung { width: 100%; overflow-x: hidden; }
+        #view-zimmerwartung.room-focus .room-list-only { display: none !important; }
+        #view-zimmerwartung.room-focus { padding-top: 8px; }
+        #maintenance-form-card { width: auto; max-width: none; clear: both; }
+        #selected-room-banner { width: auto; clear: both; }
+
+        .maintenance-sticky-actions {
+            position: sticky;
+            bottom: 10px;
+            z-index: 30;
+            background: rgba(255,255,255,.88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(60,60,67,.12);
+            border-radius: 18px;
+            padding: 10px;
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            body { display: block; }
+            #app-container {
+                max-width: none;
+                width: 100%;
+                box-shadow: none;
+            }
+            .grid { gap: 12px; padding: 0 14px; }
+            .large-title { margin-left: 16px; margin-right: 16px; }
+            .subtitle { margin-left: 16px; margin-right: 16px; }
+            .form-card, .progress-wrap, .floor-accordion, .room-selected-banner, .overview-legend, .top-actions, .today-grid, .round-dashboard, .due-card-grid {
+                margin-left: 14px;
+                margin-right: 14px;
+            }
+            .room-pill-grid { grid-template-columns: repeat(4, 1fr); }
+            .check-options { grid-template-columns: 1fr; }
+            .check-options label { text-align: left; padding: 12px; }
+            .maintenance-sticky-actions {
+                position: fixed;
+                left: 12px;
+                right: 12px;
+                bottom: calc(12px + env(safe-area-inset-bottom));
+                margin: 0;
+            }
+            #view-zimmerwartung.room-focus #maintenance-form-card {
+                margin-bottom: 110px;
+            }
+        }
+
+        @media (min-width: 900px) {
+            #app-container { max-width: 760px; }
+            .grid { grid-template-columns: repeat(4, 1fr); }
+            .room-pill-grid { grid-template-columns: repeat(6, 1fr); }
+        }
+
         #print-report { display:none; }
 
         @media print {
@@ -1568,21 +1628,21 @@
 
     <!-- Added: ROOM MAINTENANCE -->
     <div id="view-zimmerwartung" class="view">
-        <h1 class="large-title">Zimmerwartung</h1>
-        <p class="subtitle">Etagen ausklappen, Zimmer wählen, Wartung dokumentieren. Gespeichert wird lokal im Browser.</p>
+        <h1 class="large-title room-list-only">Zimmerwartung</h1>
+        <p class="subtitle room-list-only">Etagen ausklappen, Zimmer wählen, Wartung dokumentieren. Gespeichert wird lokal und bei Bedarf per Sync übertragen.</p>
 
-        <div class="progress-wrap">
+        <div class="progress-wrap room-list-only">
             <div class="progress-text" id="room-maintenance-status">Hotelprofil wird geladen…</div>
             <div class="progress-bar"><span id="room-progress-bar"></span></div>
         </div>
 
-        <div class="overview-legend">
+        <div class="overview-legend room-list-only">
             <span class="legend-chip done">Grün = gültig</span>
             <span class="legend-chip expired">Orange = abgelaufen</span>
             <span class="legend-chip open">Weiß = offen</span>
         </div>
 
-        <div id="floor-accordion-list"></div>
+        <div id="floor-accordion-list" class="room-list-only"></div>
 
         <div class="room-selected-banner" id="selected-room-banner" style="display:none;">
             <div><span style="opacity:.65;font-size:12px;font-weight:800;text-transform:uppercase;">Ausgewählt</span><br><b id="selected-room-title">Zimmer</b></div>
@@ -1603,20 +1663,21 @@
                 <label>Gesamtbemerkung / Folgemaßnahme</label>
                 <textarea id="maintenance-notes" placeholder="z. B. Hotelkit-Auftrag erstellt, Mangelmeldung nötig, Ersatzteil bestellt…"></textarea>
             </div>
-            <div class="top-actions" style="margin: 0 0 12px;">
-                <button class="primary-btn" onclick="saveMaintenanceRecord()">Speichern & schließen</button>
-                <button class="soft-btn" onclick="openView('view-einstellungen', 'Einstellungen')">Checkliste bearbeiten</button>
+            <div class="maintenance-sticky-actions">
+                <button class="primary-btn" onclick="saveMaintenanceRecord()">Speichern</button>
+                <button class="soft-btn" onclick="closeMaintenanceForm(true)">Zur Zimmerliste</button>
             </div>
-            <button class="danger-btn" style="width:100%;" onclick="resetCurrentRoomRecord()">Zimmercheck zurücksetzen</button>
+            <button class="soft-btn" style="width:100%; margin-top:8px;" onclick="openView('view-einstellungen', 'Einstellungen')">Checkliste bearbeiten</button>
+            <button class="danger-btn" style="width:100%; margin-top:8px;" onclick="resetCurrentRoomRecord()">Zimmercheck zurücksetzen</button>
         </div>
 
-        <div class="top-actions">
+        <div class="top-actions room-list-only">
             <button class="primary-btn" onclick="exportMaintenanceReport()">Gesamtbericht als PDF</button>
             <button class="soft-btn" onclick="syncPendingMaintenance()">Sync</button>
             <button class="soft-btn" onclick="openView('view-einstellungen', 'Einstellungen')">Einstellungen</button>
         </div>
 
-        <div class="note-card">
+        <div class="note-card room-list-only">
             <b>Ablage:</b> Der PDF-Export erzeugt einen Gesamtbericht: Seite 1 farbliche Zimmerübersicht, danach je erledigtem Zimmer ein Protokoll. Im Druckdialog „Als PDF speichern“ wählen und zentral ablegen.
         </div>
         <button class="bottom-back-btn" onclick="goHome()">🏠 Zurück zur Übersicht</button>
@@ -1697,6 +1758,7 @@
         
         const target = document.getElementById(viewId);
         target.style.display = 'block';
+        if (viewId !== 'view-zimmerwartung') { document.getElementById('view-zimmerwartung')?.classList.remove('room-focus'); }
         
         requestAnimationFrame(() => {
             target.classList.add('active');
@@ -1709,6 +1771,7 @@
     }
 
     function goHome() {
+        document.getElementById('view-zimmerwartung')?.classList.remove('room-focus');
         document.querySelectorAll('.view').forEach(el => {
             el.classList.remove('active');
             el.style.display = 'none';
@@ -2018,6 +2081,7 @@
         renderFloorAccordions(selectedFloorIndex);
     }
     function closeMaintenanceForm(showList = true) {
+        document.getElementById('view-zimmerwartung')?.classList.remove('room-focus');
         document.getElementById('maintenance-form-card').style.display = 'none';
         document.getElementById('selected-room-banner').style.display = 'none';
         if (showList) selectedRoom = null;
@@ -2025,6 +2089,7 @@
     }
     function selectRoom(room, floorIdx) {
         selectedRoom = room;
+        document.getElementById('view-zimmerwartung')?.classList.add('room-focus');
         selectedFloorIndex = null;
         document.querySelectorAll('.floor-accordion').forEach(el => el.classList.remove('open'));
         document.getElementById('floor-accordion-list').innerHTML = '';
