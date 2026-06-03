@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#111827">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tristar Care">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="./icon-192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Tristar Care</title>
@@ -734,7 +728,37 @@
             #print-report .small { font-size: 8pt; color:#444; }
         }
 
-    </style>
+    
+/* SharePoint Sync / Central Data */
+.sync-card {
+  border: 1px solid rgba(0,122,255,.18);
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+}
+.sync-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:999px;
+  font-size:12px; font-weight:700;
+  background:#EEF6FF; color:#0A5DB8; margin: 0 6px 8px 0;
+}
+.sync-pill.warn { background:#FFF4E5; color:#A85F00; }
+.sync-pill.ok { background:#EAF8EE; color:#1F7A3A; }
+.sync-pill.bad { background:#FFECEC; color:#B42318; }
+.sync-log {
+  max-height: 130px; overflow:auto;
+  background:#111827; color:#E5E7EB;
+  border-radius:12px; padding:10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px; line-height: 1.45; white-space: pre-wrap;
+}
+.due-card-grid { display:grid; grid-template-columns:1fr; gap:10px; margin:0 20px 24px; }
+.due-card { background:#fff; border-radius:18px; padding:14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 22px rgba(0,0,0,.05); }
+.due-card .left b { display:block; font-size:15px; }
+.due-card .left span { color:var(--text-sec); font-size:13px; }
+.due-dot { width:14px; height:14px; border-radius:50%; background:var(--ios-green); box-shadow:0 0 0 4px rgba(52,199,89,.15);}
+.due-dot.warn { background:var(--ios-orange); box-shadow:0 0 0 4px rgba(255,149,0,.15);}
+.due-dot.danger { background:var(--ios-red); box-shadow:0 0 0 4px rgba(255,59,48,.15);}
+
+</style>
 </head>
 <body>
 
@@ -1588,6 +1612,7 @@
 
         <div class="top-actions">
             <button class="primary-btn" onclick="exportMaintenanceReport()">Gesamtbericht als PDF</button>
+            <button class="soft-btn" onclick="syncPendingMaintenance()">Sync</button>
             <button class="soft-btn" onclick="openView('view-einstellungen', 'Einstellungen')">Einstellungen</button>
         </div>
 
@@ -1624,6 +1649,26 @@
                 <button class="soft-btn" onclick="addChecklistItem()">Punkt hinzufügen</button>
                 <button class="primary-btn" onclick="saveChecklistTemplate()">Checkliste speichern</button>
             </div>
+        </div>
+
+
+        <div class="settings-section-title">SharePoint / Zentrale Sammlung</div>
+        <div class="form-card sync-card">
+            <p class="item-desc" style="margin-top:0;">Die App speichert weiterhin lokal. Abgeschlossene Wartungen können zusätzlich zentral an SharePoint übertragen werden. Hierfür wird eine Power-Automate-URL eingetragen; die Listen bleiben austauschbar.</p>
+            <div id="sync-status-badges"></div>
+            <div class="form-row"><label>Hotelcode / Geräteprofil</label><input id="sync-profile-name" placeholder="z. B. BERES · iPhone Technik"></div>
+            <div class="form-row"><label>Sync-URL für Wartungen</label><input id="sync-maintenance-url" placeholder="Power Automate HTTP URL für FM_Zimmerwartungen"></div>
+            <div class="form-row"><label>Masterdaten-URL optional</label><input id="sync-masterdata-url" placeholder="Power Automate URL für FM_AppConfig / FM_Checklisten / FM_Assets"></div>
+            <div class="top-actions" style="margin: 0 0 12px;">
+                <button class="primary-btn" onclick="saveSyncSettings()">Sync-Einstellungen speichern</button>
+                <button class="soft-btn" onclick="syncPendingMaintenance()">Jetzt synchronisieren</button>
+            </div>
+            <div class="top-actions" style="margin: 0 0 12px;">
+                <button class="soft-btn" onclick="testSyncConnection()">Verbindung testen</button>
+                <button class="soft-btn" onclick="loadMasterDataFromSharePoint()">Masterdaten laden</button>
+            </div>
+            <p class="item-desc">Erwartete Listen: <b>FM_Zimmerwartungen</b>, <b>FM_Maengel</b>, <b>FM_Checklisten</b>, <b>FM_AppConfig</b>, <b>FM_Backups</b>, <b>FM_Assets</b>.</p>
+            <div id="sync-log" class="sync-log">Noch kein Sync ausgeführt.</div>
         </div>
 
         <div class="settings-section-title">Sicherung / App-Update</div>
@@ -1776,7 +1821,12 @@
         checklist: 'tristarCare.roomChecklist.v2',
         records: 'tristarCare.roomMaintenanceRecords.v2',
         person: 'tristarCare.maintenancePerson.v2',
-        validMonths: 'tristarCare.roomValidMonths.v2'
+        validMonths: 'tristarCare.roomValidMonths.v2',
+        syncSettings: 'tristarCare.syncSettings.v1',
+        pendingSync: 'tristarCare.pendingSync.v1',
+        syncedIds: 'tristarCare.syncedIds.v1',
+        appConfig: 'tristarCare.appConfig.v1',
+        assetsCache: 'tristarCare.assetsCache.v1'
     };
 
     const DEFAULT_CHECKLIST = [
@@ -1798,6 +1848,55 @@
         catch(e) { return fallback; }
     }
     function saveJson(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+    function getSyncSettings() { return loadJson(STORAGE_KEYS.syncSettings, { profileName:'', maintenanceUrl:'', masterdataUrl:'' }); }
+    function saveSyncLog(text) { const el = document.getElementById('sync-log'); if (el) el.textContent = `[${new Date().toLocaleTimeString('de-DE')}] ${text}
+` + (el.textContent || ''); }
+    function getPendingSync() { return loadJson(STORAGE_KEYS.pendingSync, []); }
+    function savePendingSync(queue) { saveJson(STORAGE_KEYS.pendingSync, queue); updateSyncBadges(); }
+    function makeSyncId(record) { return `${record.hotelcode || 'HOTEL'}-${record.room}-${record.date}`.replace(/[^A-Za-z0-9_-]/g,'_'); }
+    function queueMaintenanceSync(record) {
+        const queue = getPendingSync();
+        const syncId = makeSyncId(record);
+        const payload = buildMaintenancePayload(record, syncId);
+        const withoutDuplicate = queue.filter(x => x.syncId !== syncId);
+        withoutDuplicate.push({ syncId, createdAt:new Date().toISOString(), payload });
+        savePendingSync(withoutDuplicate);
+    }
+    function buildMaintenancePayload(record, syncId) {
+        const problems = Object.values(record.checks || {}).filter(c => c?.status === 'problem');
+        return {
+            syncId,
+            hotelCode: record.hotelcode || getHotelSetup()?.hotelcode || '',
+            room: record.room,
+            floor: Number(String(record.room || '').slice(0, -2)) || null,
+            maintenanceType: 'Zimmerwartung',
+            technician: record.person || '',
+            doneAt: record.date,
+            validUntil: record.validUntil || '',
+            problemCount: problems.length,
+            status: problems.length > 2 ? 'Kritisch' : problems.length > 0 ? 'Problem' : 'OK',
+            notes: record.notes || '',
+            appVersion: loadJson(STORAGE_KEYS.appConfig, {})?.AppVersion || '1.0.0',
+            items: (record.checklist || []).map((label, idx) => ({
+                label,
+                status: record.checks?.[idx]?.status || 'open',
+                note: record.checks?.[idx]?.note || ''
+            })),
+            payloadJSON: JSON.stringify(record)
+        };
+    }
+    function updateSyncBadges() {
+        const host = document.getElementById('sync-status-badges');
+        if (!host) return;
+        const settings = getSyncSettings();
+        const pending = getPendingSync().length;
+        const last = localStorage.getItem('tristarCare.lastSyncAt.v1');
+        host.innerHTML = `
+            <span class="sync-pill ${settings.maintenanceUrl ? 'ok' : 'warn'}">${settings.maintenanceUrl ? 'Sync-URL gesetzt' : 'Sync-URL fehlt'}</span>
+            <span class="sync-pill ${pending ? 'warn' : 'ok'}">${pending} ausstehend</span>
+            <span class="sync-pill">Letzter Sync: ${last ? escapeHtml(new Date(last).toLocaleString('de-DE')) : '—'}</span>`;
+    }
+
     function escapeHtml(value) { return String(value || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
     function migrateOldStorage() {
@@ -2010,13 +2109,14 @@
             checks: collectChecks()
         };
         saveJson(STORAGE_KEYS.records, records);
+        queueMaintenanceSync(records[roomKey(selectedRoom)]);
         const savedRoom = selectedRoom;
         selectedRoom = null;
         closeMaintenanceForm(false);
         selectedFloorIndex = null;
         renderFloorAccordions(null);
         updateMaintenanceProgress();
-        alert(`Zimmer ${savedRoom} gespeichert. Es bleibt ${getValidMonths()} Monate grün.`);
+        alert(`Zimmer ${savedRoom} gespeichert. Es bleibt ${getValidMonths()} Monate grün. Die Wartung liegt für den SharePoint-Sync bereit.`);
     }
     function resetCurrentRoomRecord() {
         if (!selectedRoom) return;
@@ -2154,6 +2254,82 @@
     function exportBackup() { saveBackupFile(); }
     function importBackup() { openBackupFile(); }
 
+
+    function saveSyncSettings() {
+        const settings = {
+            profileName: document.getElementById('sync-profile-name')?.value.trim() || '',
+            maintenanceUrl: document.getElementById('sync-maintenance-url')?.value.trim() || '',
+            masterdataUrl: document.getElementById('sync-masterdata-url')?.value.trim() || '',
+            updatedAt: new Date().toISOString()
+        };
+        saveJson(STORAGE_KEYS.syncSettings, settings);
+        updateSyncBadges();
+        saveSyncLog('Sync-Einstellungen gespeichert.');
+        alert('Sync-Einstellungen gespeichert.');
+    }
+
+    async function syncPendingMaintenance() {
+        const settings = getSyncSettings();
+        if (!settings.maintenanceUrl) { openView('view-einstellungen', 'Einstellungen'); alert('Bitte zuerst die Sync-URL für Wartungen eintragen.'); return; }
+        let queue = getPendingSync();
+        if (queue.length === 0) { saveSyncLog('Keine ausstehenden Wartungen.'); alert('Keine ausstehenden Wartungen.'); return; }
+        let ok = 0, failed = 0;
+        const stillPending = [];
+        for (const entry of queue) {
+            try {
+                const res = await fetch(settings.maintenanceUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(entry.payload)
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                ok++;
+            } catch (err) {
+                failed++;
+                stillPending.push(entry);
+            }
+        }
+        savePendingSync(stillPending);
+        localStorage.setItem('tristarCare.lastSyncAt.v1', new Date().toISOString());
+        saveSyncLog(`Synchronisation abgeschlossen: ${ok} übertragen, ${failed} offen.`);
+        alert(`Synchronisation abgeschlossen: ${ok} übertragen, ${failed} offen.`);
+    }
+
+    async function testSyncConnection() {
+        const settings = getSyncSettings();
+        if (!settings.maintenanceUrl) { alert('Keine Sync-URL eingetragen.'); return; }
+        const testPayload = { syncId:'TEST-'+Date.now(), test:true, hotelCode:getHotelSetup()?.hotelcode || '', appVersion:'1.0.0' };
+        try {
+            const res = await fetch(settings.maintenanceUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(testPayload) });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            saveSyncLog('Verbindungstest erfolgreich.');
+            alert('Verbindungstest erfolgreich.');
+        } catch (err) {
+            saveSyncLog('Verbindungstest fehlgeschlagen: ' + err.message);
+            alert('Verbindungstest fehlgeschlagen: ' + err.message);
+        }
+    }
+
+    async function loadMasterDataFromSharePoint() {
+        const settings = getSyncSettings();
+        if (!settings.masterdataUrl) { alert('Keine Masterdaten-URL eingetragen. Die App nutzt lokale Einstellungen.'); return; }
+        try {
+            const res = await fetch(settings.masterdataUrl);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            if (data.appConfig) saveJson(STORAGE_KEYS.appConfig, data.appConfig);
+            if (Array.isArray(data.checklist) && data.checklist.length) saveJson(STORAGE_KEYS.checklist, data.checklist.map(x => x.Punkt || x.Title || x));
+            if (data.validMonths || data.appConfig?.WartungGueltigMonate) localStorage.setItem(STORAGE_KEYS.validMonths, Number(data.validMonths || data.appConfig.WartungGueltigMonate));
+            if (data.assets) saveJson(STORAGE_KEYS.assetsCache, data.assets);
+            saveSyncLog('Masterdaten geladen: AppConfig / Checklisten / Assets aktualisiert.');
+            initRoomMaintenance();
+            alert('Masterdaten geladen.');
+        } catch (err) {
+            saveSyncLog('Masterdaten konnten nicht geladen werden: ' + err.message);
+            alert('Masterdaten konnten nicht geladen werden: ' + err.message);
+        }
+    }
+
     function countProblemsInRecord(rec) {
         return Object.values(rec?.checks || {}).filter(c => c?.status === 'problem').length;
     }
@@ -2211,6 +2387,7 @@
         migrateOldStorage();
         updateTodaySubtitle();
         initRoomMaintenance();
+        updateSyncBadges();
         if (!getHotelSetup()) openSetup(false);
     });
 
@@ -2244,12 +2421,6 @@
     </div>
 </div>
 <div id="print-report"></div>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
-}
-</script>
+
 </body>
 </html>
